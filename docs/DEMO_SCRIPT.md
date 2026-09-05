@@ -20,6 +20,7 @@ serve it, drop the cut.
 ## Assets
 
 - `docs/demo/index.html` — animated walkthrough, plays on load, `R` replays.
+  Ends on the three-bot architecture figure, which is shot 7.
   Record at 1280×1000 or wider. Built for screen capture: no browser-chrome
   dependency, readable at 720p, both themes, reduced-motion respected.
   The sequence runs 9.6s and the scrubber tracks it, so you can cut to any
@@ -29,7 +30,7 @@ serve it, drop the cut.
   genuine screen recording of the bot texting is worth more than the whole
   animation, and a judge can tell the difference.
 
-## Shot list — 45 seconds
+## Shot list — 55 seconds
 
 | # | Time | Shot | Audio |
 |---|---|---|---|
@@ -39,7 +40,8 @@ serve it, drop the cut.
 | 4 | 0:16–0:26 | Screen: the impact strip. HW5 and the midterm side by side, both 100 points, 4% vs 30%. | "It ranks your work by what it actually does to your grade. These are both worth a hundred points. One of them matters seven times as much." |
 | 5 | 0:26–0:34 | Phone: the ceiling message, then the reply, then the new target. | "So when a target goes out of reach, it says so, and it gives you the next one that isn't." |
 | 6 | 0:34–0:41 | Screen recording of setup: paste Canvas URL, paste token, courses list appears. Keep the real timer visible. | "Setup is a URL and a token. Under a minute." |
-| 7 | 0:41–0:45 | Static end frame: bot name, template link. | "It's a template. Install it and it starts tomorrow morning." |
+| 7 | 0:41–0:50 | Scroll to the architecture figure. Hold on the red boundary line. | "There are three bots. Only one holds the key, and only one texts you — so you never get nudged three times about the same thing." |
+| 8 | 0:50–0:55 | Static end frame: bot name, template link. | "It's a template. Install it and it starts tomorrow morning." |
 
 ## Rules for the recording
 
@@ -76,6 +78,13 @@ For LinkedIn. Sentences capitalized, no dashes.
 > point homework and a hundred point midterm look identical in Canvas. In my
 > test course one of them moves the final grade by 4 percent and the other by
 > 30.
+>
+> There are actually three bots. A Registrar that watches Canvas, a Tutor that
+> quizzes you before exams, and an Advocate that drafts the email when you need
+> an extension. Only the Registrar holds your access token and only the
+> Registrar messages you first, which is what stops three bots nudging you
+> three times about one deadline. Install the Registrar alone and everything
+> still works.
 >
 > Setup is your Canvas URL and an access token. It texts you first every
 > morning.
