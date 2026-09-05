@@ -375,6 +375,39 @@ check("connector-core", "no state ever returns 'block'",
        for r in (True, False) for p in (True, False)} & {"block", "error"}, set())
 
 
+# ── mail-draft ────────────────────────────────────────────────────────────
+def mail_action(connector, teachers, user_said_send=False):
+    """skills/mail-draft/SKILL.md. 'send' is not a reachable outcome."""
+    if connector != "connected":
+        return {"surface": "chat", "to": None}
+    if len(teachers) > 1:
+        return {"surface": "ask_which", "to": None}
+    addr = teachers[0].get("email") if teachers else None
+    return {"surface": "draft", "to": addr}          # never "send"
+
+
+T1 = [{"name": "Prof A", "email": "a@uni.edu"}]
+T1_NOEMAIL = [{"name": "Prof A"}]
+T2 = [{"name": "Prof A", "email": "a@uni.edu"}, {"name": "Prof B", "email": "b@uni.edu"}]
+
+check("mail-draft", "connected + one teacher drafts to them",
+      mail_action("connected", T1), {"surface": "draft", "to": "a@uni.edu"})
+check("mail-draft", "no address still drafts, with an empty recipient",
+      mail_action("connected", T1_NOEMAIL), {"surface": "draft", "to": None})
+check("mail-draft", "never guesses an address from a name",
+      mail_action("connected", T1_NOEMAIL)["to"], None)
+check("mail-draft", "two teachers asks rather than picking",
+      mail_action("connected", T2)["surface"], "ask_which")
+check("mail-draft", "unconnected falls back to chat, work not lost",
+      mail_action("declared", T1)["surface"], "chat")
+check("mail-draft", "'send it' still only ever drafts",
+      mail_action("connected", T1, user_said_send=True)["surface"], "draft")
+check("mail-draft", "no input reaches a send outcome",
+      {mail_action(c, t, u)["surface"]
+       for c in ("connected", "declared", "absent")
+       for t in ([], T1, T1_NOEMAIL, T2) for u in (True, False)} & {"send"}, set())
+
+
 # ── report ─────────────────────────────────────────────────────────────────
 width = max(len(n) for _, n, _, _, _ in results) + 2
 group = None
