@@ -217,6 +217,8 @@ Each agent: own worktree, own `skills/<name>/`, own `routines/<name>.md`, may on
 | calendar-sync | built | idempotency: create / patch-time / patch-title / delete / no-op |
 | syllabus-ingest | built | name normalization (HW5 = Homework 5), rename and ±1-day matching |
 | extension-email | built | not offline-verifiable; it generates prose |
+| connector-core + calendar / Gmail / Drive | built | degradation ladder, draft-never-send sweep, folder scoping, guide idempotency |
+| multi-bot (Registrar / Tutor / Advocate) | built | handoff protocol: forbidden payloads, expiry, edge legality, solo-install parity |
 | docs/DEMO_SCRIPT.md + post draft | built | plus `docs/demo/` as the animated walkthrough |
 
 **Three contract changes came out of building it**, all recorded above:
