@@ -1,6 +1,6 @@
 ---
 name: grade-model
-description: Computes weighted course grades and risk. Turns raw Canvas assignments into current/projected/floor percentages, flags at-risk courses, and ranks remaining work by how much it actually moves the grade. Use whenever a grade, a projection, or "what should I do first" is needed.
+description: Computes weighted course grades and risk. Turns raw Canvas assignments into current, floor, and ceiling percentages, works out the average still needed to hit a target, detects when a target has become unreachable, and ranks remaining work by how much it actually moves the grade. Use whenever a grade, a projection, or "what should I do first" is needed.
 ---
 
 # grade-model

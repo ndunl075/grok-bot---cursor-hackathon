@@ -28,7 +28,7 @@ a way grades are not.
 
 ```
 CSE 3901 project due Thu — 25% of your grade, not started.
-MATH 2153 exam Fri. Projected 84, floor 68.
+MATH 2153 midterm Fri — 17%. You're at 81.3, floor 54.6.
 ⚠ PHYS 1250 lecture cancelled Wednesday.
 ```
 

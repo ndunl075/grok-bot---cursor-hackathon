@@ -77,8 +77,12 @@ Assignment:
   group_id: int
   submitted: bool
   score: float | null
-  opened: bool                  # from submission.workflow_state or first-view heuristics
   impact_pct: float             # (points_possible / group_total_points) * weight_pct
+
+  # NOTE: `opened: bool` was specified here originally. The student-scoped
+  # Canvas API exposes no "viewed the assignment" signal — submission.read_state
+  # refers to reading the *grade* — so it was removed rather than faked.
+  # See docs/CANVAS_API.md and skills/canvas-core/SKILL.md.
 
 RiskScore:                      # per course, recomputed by grade-model
   course_id: int
@@ -129,16 +133,18 @@ Single point of Canvas access. All other skills call it, never the API directly.
 
 - Input: Course + Assignment[]. Output: RiskScore.
 - If `weights_source == unknown`: ask user once per course, store, proceed with equal weights and flag it.
-- Must explain itself in one line: "Projected 87, floor 71. Project (25%) is the swing."
+- Must explain itself in one line: "You're at 85.6, floor 59.0. Project 2 (25%)
+  is the swing." When the target has gone out of reach, that line replaces it.
 
 ### daily-brief
 
-- Composes morning message from RiskScore + due-in-72h + unopened + announcements(24h).
+- Composes morning message from RiskScore + due-in-72h + announcements(24h).
 - Max 6 lines short mode. Lead with the highest impact item. Never list everything.
 
 ### deadline-guard
 
-- 48h: unopened OR unsubmitted with impact_pct ≥ 3.
+- 48h: unsubmitted with impact_pct ≥ 3. (Originally "unopened OR unsubmitted";
+  `opened` is not obtainable, so the rule is impact-gated instead.)
 - 24h: any unsubmitted. Include "reply 'ext' to draft an extension email."
 - Dedupe: never nudge same assignment twice in same window.
 
