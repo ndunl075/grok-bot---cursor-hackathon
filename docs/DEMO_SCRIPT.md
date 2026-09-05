@@ -20,8 +20,11 @@ serve it, drop the cut.
 ## Assets
 
 - `docs/demo/index.html` — animated walkthrough, plays on load, `R` replays.
-  Record at 1280×1000 or wider. It is built for screen capture: monochrome,
-  no browser chrome dependency, readable at 720p.
+  Record at 1280×1000 or wider. Built for screen capture: no browser-chrome
+  dependency, readable at 720p, both themes, reduced-motion respected.
+  The sequence runs 9.6s and the scrubber tracks it, so you can cut to any
+  beat. Amber is the grade still winnable; the single red element on the page
+  is the target marker landing outside it.
 - A real phone showing the actual bot thread. **Do not fake this.** One
   genuine screen recording of the bot texting is worth more than the whole
   animation, and a judge can tell the difference.
@@ -30,7 +33,7 @@ serve it, drop the cut.
 
 | # | Time | Shot | Audio |
 |---|---|---|---|
-| 1 | 0:00–0:04 | Cold open on the instrument bar, target marker landing *outside* the ceiling. No title card. | "An A in this class stopped being possible two weeks ago." |
+| 1 | 0:00–0:04 | Cold open on the instrument. Amber wipes right, then the red target marker drops *past* its edge and flashes. No title card. | "An A in this class stopped being possible two weeks ago." |
 | 2 | 0:04–0:08 | Same frame, the `2.0 out of reach` bracket draws. | "Canvas never mentioned it." |
 | 3 | 0:08–0:16 | Cut to phone. Real bot thread, messages arriving. | "This is a Grok Bot that reads your Canvas and texts you first." |
 | 4 | 0:16–0:26 | Screen: the impact strip. HW5 and the midterm side by side, both 100 points, 4% vs 30%. | "It ranks your work by what it actually does to your grade. These are both worth a hundred points. One of them matters seven times as much." |

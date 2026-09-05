@@ -11,39 +11,51 @@
 </head>
 <body>
 <style>
-/* ── tokens ─────────────────────────────────────────────────────────────
-   Dark-first: the bare :root carries the committed "stage" palette.
-   Light is a consistent swap, defined in both the media query and the stamp.
-   Achromatic by design — every neutral carries a slight cool bias so the
-   greys read as chosen instrument greys, not default #808080.            */
+/* ── tokens ───────────────────────────────────────────────────────────────
+   Dark-first "instrument" palette. One large colour field (amber = the grade
+   still winnable) against a deep ink ground, and exactly one red element on
+   the page: the target marker that lands outside the amber. Everything else
+   is neutral so those two carry all the meaning.                            */
 :root{
-  --stage:#0F1114;  --surface:#171A1E;  --raised:#1E2228;
-  --line:#282D34;   --line-2:#343A43;
-  --ink:#F1F3F5;    --ink-2:#A8AFB8;    --ink-3:#6E767F;
-  --band-locked:#3C434C;  --band-open:#8E979F;  --band-lost:#22262B;
-  --hatch:#3A4048;
-  --glow:rgba(241,243,245,.10);
-  --shadow:0 1px 0 rgba(255,255,255,.04), 0 18px 40px -24px rgba(0,0,0,.9);
+  --stage:#0A0D12;   --surface:#12161D;   --raised:#191F27;
+  --line:#232A34;    --line-2:#323B48;
+  --ink:#EEF2F7;     --ink-2:#9AA5B2;     --ink-3:#626D7B;
+  --banked:#333D4A;                       /* already earned, locked in       */
+  --winnable:#F5B942;                     /* the one big colour field        */
+  --winnable-dim:#7A5C1F;
+  --void:#0E1218;    --hatch:#242C36;     /* arithmetically closed           */
+  --alarm:#FF4D3D;                        /* the single red thing            */
+  --grid:rgba(238,242,247,.045);
+  --shadow:0 1px 0 rgba(255,255,255,.04), 0 26px 60px -30px rgba(0,0,0,.95);
+  --sweep:rgba(245,185,66,.85);
 }
 @media (prefers-color-scheme: light){
   :root:not([data-theme="dark"]){
-    --stage:#E7E9EC;  --surface:#FFFFFF;  --raised:#F2F4F6;
-    --line:#D6DAE0;   --line-2:#BFC5CD;
-    --ink:#12151A;    --ink-2:#4E555E;    --ink-3:#858D97;
-    --band-locked:#C2C8D0;  --band-open:#5B646E;  --band-lost:#DDE1E6;
-    --hatch:#B6BDC6;
-    --glow:rgba(18,21,26,.07);
-    --shadow:0 1px 0 rgba(255,255,255,.7), 0 18px 40px -26px rgba(20,26,34,.35);
+    --stage:#F3F1ED;   --surface:#FFFFFF;   --raised:#FAF9F6;
+    --line:#E0DDD6;    --line-2:#C7C3BA;
+    --ink:#14181E;     --ink-2:#54606E;     --ink-3:#8A94A0;
+    --banked:#BFC6CF;
+    --winnable:#E9A21F;
+    --winnable-dim:#C98D1B;
+    --void:#E9E6E0;    --hatch:#CFCBC2;
+    --alarm:#DC3220;
+    --grid:rgba(20,24,30,.05);
+    --shadow:0 1px 0 rgba(255,255,255,.8), 0 26px 60px -34px rgba(30,26,20,.45);
+    --sweep:rgba(233,162,31,.9);
   }
 }
 :root[data-theme="light"]{
-  --stage:#E7E9EC;  --surface:#FFFFFF;  --raised:#F2F4F6;
-  --line:#D6DAE0;   --line-2:#BFC5CD;
-  --ink:#12151A;    --ink-2:#4E555E;    --ink-3:#858D97;
-  --band-locked:#C2C8D0;  --band-open:#5B646E;  --band-lost:#DDE1E6;
-  --hatch:#B6BDC6;
-  --glow:rgba(18,21,26,.07);
-  --shadow:0 1px 0 rgba(255,255,255,.7), 0 18px 40px -26px rgba(20,26,34,.35);
+  --stage:#F3F1ED;   --surface:#FFFFFF;   --raised:#FAF9F6;
+  --line:#E0DDD6;    --line-2:#C7C3BA;
+  --ink:#14181E;     --ink-2:#54606E;     --ink-3:#8A94A0;
+  --banked:#BFC6CF;
+  --winnable:#E9A21F;
+  --winnable-dim:#C98D1B;
+  --void:#E9E6E0;    --hatch:#CFCBC2;
+  --alarm:#DC3220;
+  --grid:rgba(20,24,30,.05);
+  --shadow:0 1px 0 rgba(255,255,255,.8), 0 26px 60px -34px rgba(30,26,20,.45);
+  --sweep:rgba(233,162,31,.9);
 }
 
 *{box-sizing:border-box}
@@ -51,205 +63,286 @@ p{margin:0}
 body{
   background:var(--stage); color:var(--ink);
   font-family:"Archivo",system-ui,-apple-system,"Segoe UI",sans-serif;
-  font-size:15px; line-height:1.5;
-  -webkit-font-smoothing:antialiased;
+  font-size:15px; line-height:1.5; -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
 }
-.stage{max-width:1140px; margin:0 auto; padding:44px 28px 64px}
 
-/* ── type roles ─────────────────────────────────────────────────────── */
+/* ambient plotting grid — slow drift, depth without decoration */
+.backdrop{
+  position:fixed; inset:-40px; z-index:0; pointer-events:none;
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size:56px 56px;
+  mask-image:radial-gradient(ellipse 90% 70% at 50% 34%, #000 20%, transparent 78%);
+  animation:drift 62s linear infinite;
+}
+@keyframes drift{ to{ background-position:56px 56px } }
+
+.stage{position:relative; z-index:1; max-width:1140px; margin:0 auto; padding:44px 28px 40px}
+/* the camera: one slow push on load, nothing per-element */
+.stage{transition:transform 1.5s cubic-bezier(.16,1,.3,1), filter 1.1s ease}
+body.cue .stage{transform:scale(1.035); filter:blur(5px)}
+
+/* ── type roles ────────────────────────────────────────────────────────── */
 .eyebrow{
+  display:flex; align-items:center; gap:10px;
   font-size:11px; font-weight:600; letter-spacing:.16em; text-transform:uppercase;
   color:var(--ink-3); font-stretch:88%;
 }
+.eyebrow::before{
+  content:""; width:7px; height:7px; border-radius:50%; background:var(--winnable);
+  box-shadow:0 0 0 0 var(--winnable); animation:pulse 2.6s ease-out infinite;
+}
+@keyframes pulse{
+  0%{box-shadow:0 0 0 0 rgba(245,185,66,.5)}
+  70%,100%{box-shadow:0 0 0 9px rgba(245,185,66,0)}
+}
 h1{
-  font-size:clamp(34px,5.4vw,62px); line-height:.98; margin:14px 0 0;
-  font-weight:800; font-stretch:82%; letter-spacing:-.02em;
-  text-wrap:balance;
+  font-size:clamp(32px,4.7vw,54px); line-height:1.0; margin:16px 0 0;
+  font-weight:800; font-stretch:80%; letter-spacing:-.022em; text-wrap:balance;
 }
+h1 .hot{color:var(--winnable)}
 h1 .dim{color:var(--ink-3)}
-.lede{
-  margin:18px 0 0; max-width:60ch; color:var(--ink-2); font-size:16px;
-}
+.lede{margin:20px 0 0; max-width:58ch; color:var(--ink-2); font-size:16.5px}
 .num{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace; font-variant-numeric:tabular-nums}
 h2{
   font-size:12px; font-weight:600; letter-spacing:.14em; text-transform:uppercase;
-  color:var(--ink-3); margin:0 0 16px; font-stretch:88%;
+  color:var(--ink-3); margin:0 0 18px; font-stretch:88%;
 }
 
-/* ── the instrument (hero) ──────────────────────────────────────────── */
-.instrument{margin-top:48px}
+/* ── hero instrument ───────────────────────────────────────────────────── */
+.instrument{margin-top:52px}
 .scale{
-  position:relative; height:78px; border-radius:3px; overflow:visible;
-  background:var(--band-lost);
+  position:relative; height:96px; border-radius:4px;
+  background:var(--void); box-shadow:inset 0 0 0 1px var(--line);
 }
 .band{
   position:absolute; top:0; bottom:0; transform-origin:left center;
-  transition:transform .9s cubic-bezier(.16,1,.3,1);
+  transition:transform 1.05s cubic-bezier(.16,1,.3,1);
 }
-.band.locked{left:0; width:20.00%; background:var(--band-locked)}
-.band.open{left:20.00%; width:64.44%; background:var(--band-open)}
+.band.banked{left:0; width:20.00%; background:var(--banked)}
+.band.win{
+  left:20.00%; width:64.44%;
+  background:linear-gradient(180deg, var(--winnable) 0%, var(--winnable-dim) 190%);
+}
 .band.lost{
   left:84.44%; right:0;
-  background:repeating-linear-gradient(-45deg,
-    var(--hatch) 0 1.5px, transparent 1.5px 8px);
+  background:repeating-linear-gradient(-45deg, var(--hatch) 0 1.5px, transparent 1.5px 9px);
   border-left:1px solid var(--line-2);
 }
 [data-step]:not(.in) .band{transform:scaleX(0)}
 
-/* markers ride above the scale */
+/* leading-edge light that rides the amber wipe */
+.sweep{
+  position:absolute; top:0; bottom:0; width:120px; left:20%;
+  background:linear-gradient(90deg, transparent, var(--sweep));
+  opacity:0; pointer-events:none; mix-blend-mode:screen;
+}
+.sweep.run{animation:sweep 1.05s cubic-bezier(.16,1,.3,1) forwards}
+@keyframes sweep{
+  0%{opacity:.9; transform:translateX(0)}
+  85%{opacity:.55}
+  100%{opacity:0; transform:translateX(735%)}
+}
+
 .mark{
-  position:absolute; top:-9px; bottom:-9px; width:2px; background:var(--ink);
-  transition:opacity .5s ease, transform .7s cubic-bezier(.2,1.3,.35,1);
+  position:absolute; top:-11px; bottom:-11px; width:2px; background:var(--ink);
+  transition:opacity .45s ease, transform .8s cubic-bezier(.2,1.5,.35,1);
 }
 .mark::after{
-  content:attr(data-label); position:absolute; left:50%; bottom:calc(100% + 9px);
+  content:attr(data-label); position:absolute; left:50%; bottom:calc(100% + 10px);
   transform:translateX(-50%); white-space:nowrap;
-  font-family:"IBM Plex Mono",monospace; font-size:11px; font-weight:600;
+  font-family:"IBM Plex Mono",monospace; font-size:11.5px; font-weight:600;
   letter-spacing:.04em; color:var(--ink);
 }
 .mark.current{left:79.11%}
-.mark.target{left:88.89%; background:var(--ink-3); width:1px}
-.mark.target::after{color:var(--ink-3)}
+.mark.target{
+  left:88.89%; width:2px; background:var(--alarm);
+  box-shadow:0 0 14px rgba(255,77,61,.55);
+}
+.mark.target::after{color:var(--alarm)}
+.mark.target.flash{animation:flash 1.5s ease-out 1}
+@keyframes flash{
+  0%,100%{box-shadow:0 0 14px rgba(255,77,61,.55)}
+  25%{box-shadow:0 0 34px rgba(255,77,61,.95)}
+}
 
-/* the gap bracket: ceiling → target */
 .gap{
   position:absolute; left:84.44%; width:4.45%; top:calc(100% + 34px); height:14px;
-  border:1px solid var(--line-2); border-top:none;
+  border:1px solid var(--alarm); border-top:none;
+  transition:opacity .5s ease;
 }
 .gap span{
-  position:absolute; left:50%; top:calc(100% + 7px); transform:translateX(-50%);
-  white-space:nowrap; font-family:"IBM Plex Mono",monospace; font-size:11px;
-  color:var(--ink-2); letter-spacing:.03em;
+  position:absolute; left:50%; top:calc(100% + 8px); transform:translateX(-50%);
+  white-space:nowrap; font-family:"IBM Plex Mono",monospace; font-size:11.5px;
+  color:var(--alarm); letter-spacing:.03em; font-weight:500;
 }
 
-.ticks{position:relative; height:20px; margin-top:8px}
+.ticks{position:relative; height:20px; margin-top:9px}
 .tick{
   position:absolute; top:0; font-family:"IBM Plex Mono",monospace;
   font-size:11px; color:var(--ink-3); transform:translateX(-50%);
 }
 .tick::before{
-  content:""; position:absolute; left:50%; top:-8px; width:1px; height:5px;
+  content:""; position:absolute; left:50%; top:-9px; width:1px; height:6px;
   background:var(--line-2);
 }
 
 .legend{
-  display:flex; flex-wrap:wrap; gap:26px; margin-top:38px;
-  padding-top:18px; border-top:1px solid var(--line);
+  display:flex; flex-wrap:wrap; gap:28px; margin-top:40px;
+  padding-top:20px; border-top:1px solid var(--line);
 }
-.legend div{display:flex; align-items:baseline; gap:9px; font-size:13px; color:var(--ink-2)}
-.swatch{width:16px; height:9px; border-radius:1px; flex:none; transform:translateY(-1px)}
-.swatch.a{background:var(--band-locked)}
-.swatch.b{background:var(--band-open)}
+.legend div{display:flex; align-items:baseline; gap:10px; font-size:13.5px; color:var(--ink-2)}
+.swatch{width:18px; height:10px; border-radius:2px; flex:none; transform:translateY(-1px)}
+.swatch.a{background:var(--banked)}
+.swatch.b{background:var(--winnable)}
 .swatch.c{background:repeating-linear-gradient(-45deg,var(--hatch) 0 1.5px,transparent 1.5px 6px); outline:1px solid var(--line-2)}
 .legend b{color:var(--ink); font-weight:600}
 
-/* ── lower grid ─────────────────────────────────────────────────────── */
+/* ── lower grid ────────────────────────────────────────────────────────── */
 .grid{
   display:grid; grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);
-  gap:44px; margin-top:56px; align-items:start;
+  gap:46px; margin-top:60px; align-items:start;
 }
 @media (max-width:820px){ .grid{grid-template-columns:1fr; gap:48px} }
 
-/* message thread — a surface, not a phone bezel */
 .thread{
-  background:var(--surface); border:1px solid var(--line); border-radius:14px;
+  background:var(--surface); border:1px solid var(--line); border-radius:16px;
   padding:18px 18px 22px; box-shadow:var(--shadow);
 }
 .thread-head{
-  display:flex; align-items:center; gap:10px; padding-bottom:14px;
+  display:flex; align-items:center; gap:11px; padding-bottom:15px;
   border-bottom:1px solid var(--line); margin-bottom:18px;
 }
 .avatar{
-  width:26px; height:26px; border-radius:50%; flex:none;
-  background:var(--raised); border:1px solid var(--line-2);
+  width:28px; height:28px; border-radius:50%; flex:none;
+  background:var(--winnable); color:#0A0D12;
   display:grid; place-items:center;
-  font-size:11px; font-weight:800; color:var(--ink-2); font-stretch:80%;
+  font-size:11px; font-weight:800; font-stretch:78%;
 }
-.thread-head .who{font-size:13px; font-weight:600}
+.thread-head .who{font-size:13.5px; font-weight:600}
 .thread-head .when{
   margin-left:auto; font-family:"IBM Plex Mono",monospace;
   font-size:11px; color:var(--ink-3);
 }
 .msgs{display:flex; flex-direction:column; gap:11px}
 .msg{
-  max-width:88%; padding:11px 14px; border-radius:13px 13px 13px 4px;
+  max-width:88%; padding:12px 15px; border-radius:14px 14px 14px 5px;
   background:var(--raised); border:1px solid var(--line);
   font-size:14px; line-height:1.45;
-  transition:opacity .5s ease, transform .6s cubic-bezier(.16,1,.3,1);
+  transition:opacity .45s ease, transform .6s cubic-bezier(.16,1,.3,1), filter .45s ease;
 }
 .msg.me{
-  align-self:flex-end; border-radius:13px 13px 4px 13px;
+  align-self:flex-end; border-radius:14px 14px 5px 14px;
   background:transparent; border-color:var(--line-2); color:var(--ink-2);
 }
-.msg.key{border-color:var(--line-2); box-shadow:0 0 0 3px var(--glow)}
-.msg .num{font-weight:600}
-[data-step]:not(.in) .msg{opacity:0; transform:translateY(9px)}
+.msg.key{
+  border-color:var(--alarm);
+  box-shadow:0 0 0 1px var(--alarm), 0 0 26px -6px rgba(255,77,61,.4);
+}
+.msg.key .num{color:var(--alarm)}
+.msg .num{font-weight:600; color:var(--winnable)}
+.msg.me .num{color:inherit}
+.typing{
+  display:inline-flex; gap:4px; align-items:center; height:10px;
+}
+.typing i{
+  width:5px; height:5px; border-radius:50%; background:var(--ink-3);
+  animation:blink 1.2s ease-in-out infinite;
+}
+.typing i:nth-child(2){animation-delay:.18s}
+.typing i:nth-child(3){animation-delay:.36s}
+@keyframes blink{0%,60%,100%{opacity:.28} 30%{opacity:1}}
 
 /* mechanism panel */
-.mech{display:flex; flex-direction:column; gap:30px}
-.impact{display:flex; flex-direction:column; gap:18px}
-.row{display:grid; grid-template-columns:1fr 52px; gap:14px; align-items:center}
-.row .name{font-size:13px; color:var(--ink-2)}
+.mech{display:flex; flex-direction:column; gap:34px}
+.impact{display:flex; flex-direction:column; gap:19px}
+.row{display:grid; grid-template-columns:1fr 56px; gap:14px; align-items:center}
+.row .name{font-size:13.5px; color:var(--ink-2)}
 .row .name b{color:var(--ink); font-weight:600}
 .row .val{
-  font-family:"IBM Plex Mono",monospace; font-size:13px; text-align:right;
-  color:var(--ink);
+  font-family:"IBM Plex Mono",monospace; font-size:13.5px; text-align:right;
+  color:var(--winnable); font-weight:500;
 }
+.row.spent .val{color:var(--ink-3)}
 .row .track{
-  grid-column:1/-1; display:block; height:7px; border-radius:2px;
-  background:var(--band-lost); border:1px solid var(--line); overflow:hidden;
+  grid-column:1/-1; display:block; height:8px; border-radius:2px;
+  background:var(--void); box-shadow:inset 0 0 0 1px var(--line); overflow:hidden;
 }
 .row .fill{
-  display:block; width:100%; height:100%; background:var(--band-open);
-  transform-origin:left center; transition:transform .8s cubic-bezier(.16,1,.3,1);
+  display:block; width:100%; height:100%; background:var(--winnable);
+  transform-origin:left center; transition:transform .9s cubic-bezier(.16,1,.3,1);
 }
-[data-step]:not(.in) .fill{transform:scaleX(0)}
+.row.spent .fill{background:var(--banked)}
+[data-step]:not(.in) .fill{transform:scaleX(0) !important}
 
 .facts{display:flex; flex-direction:column; border-top:1px solid var(--line)}
 .fact{
-  display:flex; align-items:baseline; gap:16px; padding:13px 0;
+  display:flex; align-items:baseline; gap:16px; padding:14px 0;
   border-bottom:1px solid var(--line);
 }
-.fact .k{font-size:13px; color:var(--ink-2); flex:1}
+.fact .k{font-size:13.5px; color:var(--ink-2); flex:1}
 .fact .v{
-  font-family:"IBM Plex Mono",monospace; font-size:15px; font-weight:600;
-  color:var(--ink); white-space:nowrap;
+  font-family:"IBM Plex Mono",monospace; font-size:16px; font-weight:600;
+  color:var(--alarm); white-space:nowrap;
 }
-.fact .v.off{color:var(--ink-3)}
+.fact.ok .v{color:var(--winnable)}
 
-/* ── controls / footer ──────────────────────────────────────────────── */
+/* ── controls ──────────────────────────────────────────────────────────── */
 .foot{
-  display:flex; flex-wrap:wrap; align-items:center; gap:18px;
-  margin-top:52px; padding-top:20px; border-top:1px solid var(--line);
+  display:flex; flex-wrap:wrap; align-items:center; gap:16px;
+  margin-top:56px; padding-top:22px; border-top:1px solid var(--line);
 }
+.foot{margin-bottom:18px}
 button{
-  font:inherit; font-size:13px; font-weight:600; color:var(--ink);
-  background:var(--raised); border:1px solid var(--line-2);
-  padding:9px 18px; border-radius:7px; cursor:pointer;
-  transition:background .15s ease, border-color .15s ease;
+  font:inherit; font-size:13px; font-weight:600; color:var(--stage);
+  background:var(--winnable); border:1px solid var(--winnable);
+  padding:10px 20px; border-radius:8px; cursor:pointer;
+  transition:filter .15s ease, transform .15s ease;
 }
-button:hover{background:var(--surface); border-color:var(--ink-3)}
-button:focus-visible{outline:2px solid var(--ink); outline-offset:2px}
-.note{font-size:12.5px; color:var(--ink-3); max-width:62ch}
+button:hover{filter:brightness(1.08)}
+button:active{transform:translateY(1px)}
+button:focus-visible{outline:2px solid var(--ink); outline-offset:3px}
+.scrub{
+  width:180px; flex:none; height:3px; border-radius:2px;
+  background:var(--line); overflow:hidden;
+}
+.scrub i{
+  display:block; height:100%; width:100%; background:var(--winnable);
+  transform-origin:left center; transform:scaleX(1); opacity:.3;
+  transition:opacity .3s ease;
+}
+.scrub i.run{opacity:1}
+.scrub i.run{animation:scrub 9.6s linear forwards}
+@keyframes scrub{from{transform:scaleX(0)} to{transform:scaleX(1)}}
+.note{font-size:12.5px; color:var(--ink-3); max-width:64ch; line-height:1.55}
 .note code{
   font-family:"IBM Plex Mono",monospace; font-size:11.5px;
   color:var(--ink-2); background:var(--raised);
   padding:1px 5px; border-radius:3px; border:1px solid var(--line);
 }
+.kbd{
+  font-family:"IBM Plex Mono",monospace; font-size:11px; color:var(--ink-3);
+  border:1px solid var(--line-2); border-radius:4px; padding:2px 6px;
+}
 
 @media (prefers-reduced-motion: reduce){
-  *{transition-duration:0s !important}
+  *,*::before,*::after{
+    transition-duration:0s !important; animation:none !important;
+  }
 }
 </style>
 
+<div class="backdrop"></div>
 <div class="stage">
 
   <p class="eyebrow">Canvas assistant &middot; Grok Bot</p>
-  <h1>Your ceiling is <span class="num">88.0</span>.<br><span class="dim">The A was gone two weeks ago.</span></h1>
+  <h1>Your ceiling is <span class="hot num" data-count="88.0" data-dp="1">88.0</span>.<br><span class="dim">The A was gone two weeks ago.</span></h1>
   <p class="lede">
-    Canvas shows a student their current grade. It never shows them the grade
-    they can still reach. This bot computes both, every four hours, and says
-    something only when the answer changed.
+    Canvas shows a student the grade they have. It never shows them the grade
+    they can still reach. This bot computes both every four hours, and speaks
+    up only when the answer changes.
   </p>
 
   <!-- ── hero instrument ─────────────────────────────────────────────── -->
@@ -257,9 +350,10 @@ button:focus-visible{outline:2px solid var(--ink); outline-offset:2px}
     <h2>CSE 3901 &mdash; every final grade still available</h2>
 
     <div class="scale">
-      <div class="band locked"></div>
-      <div class="band open"></div>
+      <div class="band banked"></div>
+      <div class="band win"></div>
       <div class="band lost"></div>
+      <div class="sweep"></div>
       <div class="mark current" data-label="85.6 now"></div>
       <div class="mark target" data-label="90 target"></div>
       <div class="gap"><span>2.0 out of reach</span></div>
@@ -305,33 +399,33 @@ button:focus-visible{outline:2px solid var(--ink); outline-offset:2px}
         <div class="impact">
           <div class="row">
             <span class="name"><b>Project 2</b> &middot; 100 pts &middot; due Thu</span>
-            <span class="val">25.0%</span>
+            <span class="val num" data-count="25.0" data-dp="1" data-suffix="%">25.0%</span>
             <span class="track"><span class="fill" style="transform:scaleX(.833)"></span></span>
           </div>
           <div class="row">
             <span class="name"><b>HW5</b> &middot; 20 pts &middot; due Sep 16</span>
-            <span class="val">4.0%</span>
+            <span class="val num" data-count="4.0" data-dp="1" data-suffix="%">4.0%</span>
             <span class="track"><span class="fill" style="transform:scaleX(.133)"></span></span>
           </div>
-          <div class="row">
+          <div class="row spent">
             <span class="name">Midterm &middot; 100 pts &middot; graded 72</span>
-            <span class="val" style="color:var(--ink-3)">spent</span>
-            <span class="track"><span class="fill" style="transform:scaleX(1);background:var(--band-locked)"></span></span>
+            <span class="val">spent</span>
+            <span class="track"><span class="fill" style="transform:scaleX(1)"></span></span>
           </div>
         </div>
-        <p class="note" style="margin-top:14px">
-          Impact is <code>points &divide; group total &times; group weight</code>, not points possible.
-          HW5 and the midterm are both worth 100&nbsp;points to Canvas. One of them
-          moves the grade seven times as much.
+        <p class="note" style="margin-top:16px">
+          Impact is <code>points &divide; group total &times; group weight</code>, not points
+          possible. HW5 and the midterm are both worth 100&nbsp;points to Canvas.
+          One of them moves the final grade seven times as much.
         </p>
       </div>
 
       <div data-step="4">
         <h2>What it would take</h2>
         <div class="facts">
-          <div class="fact"><span class="k">Average needed on remaining, for a 90</span><span class="v off">106.9%</span></div>
-          <div class="fact"><span class="k">&hellip; for an 87</span><span class="v off">96.6%</span></div>
-          <div class="fact"><span class="k">&hellip; for an 85</span><span class="v">89.7%</span></div>
+          <div class="fact"><span class="k">Average needed on remaining, for a 90</span><span class="v num" data-count="106.9" data-dp="1" data-suffix="%">106.9%</span></div>
+          <div class="fact"><span class="k">&hellip; for an 87</span><span class="v num" data-count="96.6" data-dp="1" data-suffix="%">96.6%</span></div>
+          <div class="fact ok"><span class="k">&hellip; for an 85</span><span class="v num" data-count="89.7" data-dp="1" data-suffix="%">89.7%</span></div>
         </div>
       </div>
     </section>
@@ -339,53 +433,101 @@ button:focus-visible{outline:2px solid var(--ink); outline-offset:2px}
 
   <div class="foot">
     <button id="replay" type="button">Replay</button>
-    <p class="note">
-      Every figure is computed from <code>tests/fixtures/</code> by
-      <code>tools/grade_model_ref.py</code>, and checked against Canvas&rsquo;s own
-      <code>computed_current_score</code> &mdash; drift <span class="num">0.0</span> on both
-      the weighted and the unweighted course. No live API calls, no invented numbers.
-    </p>
+    <span class="scrub"><i id="scrub"></i></span>
+    <span class="kbd">R</span>
   </div>
+  <p class="note">
+      Every figure is computed from <code>tests/fixtures/</code> by
+      <code>tools/grade_model_ref.py</code> and reconciled against Canvas&rsquo;s own
+      <code>computed_current_score</code> &mdash; drift <span class="num">0.0</span> on both the
+    weighted and the unweighted course. No live API calls, no invented numbers.
+  </p>
 </div>
 
 <script>
 (function () {
-  var steps = Array.prototype.slice.call(document.querySelectorAll('[data-step]'));
-  var msgs  = Array.prototype.slice.call(document.querySelectorAll('.msg'));
-  var marks = Array.prototype.slice.call(document.querySelectorAll('.mark, .gap'));
-  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var timers = [];
-
-  // Resting state: everything visible. Motion is a replay of how it got here.
-  function settle() {
-    steps.forEach(function (s) { s.classList.add('in'); });
-    msgs.forEach(function (m) { m.style.opacity = ''; m.style.transform = ''; });
-    marks.forEach(function (m) { m.style.opacity = ''; m.style.transform = ''; });
-  }
+  var steps   = [].slice.call(document.querySelectorAll('[data-step]'));
+  var msgs    = [].slice.call(document.querySelectorAll('.msg'));
+  var marks   = [].slice.call(document.querySelectorAll('.mark'));
+  var gap     = document.querySelector('.gap');
+  var sweep   = document.querySelector('.sweep');
+  var target  = document.querySelector('.mark.target');
+  var scrub   = document.getElementById('scrub');
+  var counters= [].slice.call(document.querySelectorAll('[data-count]'));
+  var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var timers  = [];
 
   function at(ms, fn) { timers.push(setTimeout(fn, ms)); }
+  function show(el) { el.style.opacity = ''; el.style.transform = ''; el.style.filter = ''; }
+  function hide(el, y) {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(' + y + 'px)';
+  }
+
+  function fmt(v, dp, suffix) { return v.toFixed(dp) + (suffix || ''); }
+
+  function countUp(el, dur) {
+    var to = parseFloat(el.dataset.count),
+        dp = parseInt(el.dataset.dp || '0', 10),
+        sx = el.dataset.suffix || '',
+        t0 = performance.now();
+    (function frame(now) {
+      var p = Math.min(1, (now - t0) / dur);
+      var e = 1 - Math.pow(1 - p, 3);                 // ease-out cubic
+      el.textContent = fmt(to * e, dp, sx);
+      if (p < 1) requestAnimationFrame(frame);
+      else el.textContent = fmt(to, dp, sx);
+    })(t0);
+  }
+
+  // Resting state: the finished page. Motion only ever replays how it got here.
+  function settle() {
+    steps.forEach(function (s) { s.classList.add('in'); });
+    msgs.concat(marks).forEach(show);
+    if (gap) show(gap);
+    counters.forEach(function (el) {
+      el.textContent = fmt(parseFloat(el.dataset.count),
+                           parseInt(el.dataset.dp || '0', 10), el.dataset.suffix || '');
+    });
+    document.body.classList.remove('cue');
+  }
 
   function play() {
     timers.forEach(clearTimeout); timers = [];
     if (reduced) { settle(); return; }
 
     steps.forEach(function (s) { s.classList.remove('in'); });
-    marks.forEach(function (m) { m.style.opacity = '0'; m.style.transform = 'translateY(6px)'; });
-    void document.body.offsetHeight;                       // flush
+    marks.forEach(function (m) { hide(m, -8); });
+    hide(gap, 0);
+    msgs.forEach(function (m) { m.style.filter = 'blur(3px)'; hide(m, 10); });
+    document.body.classList.add('cue');                       // camera pulls back
+    sweep.classList.remove('run'); target.classList.remove('flash');
+    scrub.classList.remove('run'); void scrub.offsetWidth; scrub.classList.add('run');
+    void document.body.offsetHeight;
 
-    at(120,  function () { steps[0].classList.add('in'); });   // bands draw
-    at(900,  function () { marks[0].style.opacity = ''; marks[0].style.transform = ''; });
-    at(1250, function () { marks[1].style.opacity = ''; marks[1].style.transform = ''; });
-    at(1550, function () { marks[2].style.opacity = ''; marks[2].style.transform = ''; });
+    at(60,   function () { document.body.classList.remove('cue'); });   // push in
+    at(260,  function () { countUp(document.querySelector('h1 .num'), 1000); });
 
-    at(1750, function () { steps[1].classList.add('in'); });   // thread container
-    msgs.forEach(function (m, i) {                             // messages, staggered
-      m.style.opacity = '0'; m.style.transform = 'translateY(9px)';
-      at(1850 + i * 620, function () { m.style.opacity = ''; m.style.transform = ''; });
+    at(500,  function () { steps[0].classList.add('in'); sweep.classList.add('run'); });
+    at(1350, function () { show(marks[0]); });                          // 85.6 now
+    at(1750, function () { show(marks[1]); });                          // 90 target
+    at(2150, function () { show(gap); target.classList.add('flash'); });
+
+    at(2450, function () { steps[1].classList.add('in'); });
+    msgs.forEach(function (m, i) {
+      at(2550 + i * 700, function () { show(m); });
     });
 
-    at(2400, function () { steps[2].classList.add('in'); });   // impact bars
-    at(3100, function () { steps[3].classList.add('in'); });   // needed table
+    at(3100, function () {
+      steps[2].classList.add('in');
+      [].slice.call(document.querySelectorAll('.row .val[data-count]'))
+        .forEach(function (el) { countUp(el, 700); });
+    });
+    at(4000, function () {
+      steps[3].classList.add('in');
+      [].slice.call(document.querySelectorAll('.fact .v[data-count]'))
+        .forEach(function (el, i) { at(i * 180, function () { countUp(el, 800); }); });
+    });
   }
 
   settle();
@@ -393,7 +535,7 @@ button:focus-visible{outline:2px solid var(--ink); outline-offset:2px}
   document.addEventListener('keydown', function (e) {
     if (e.key === 'r' || e.key === 'R') play();
   });
-  if (!reduced) at(400, play);
+  if (!reduced) at(350, play);
 })();
 </script>
 </body></html>
