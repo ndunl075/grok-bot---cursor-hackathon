@@ -23,10 +23,10 @@ When you sit down, in this order:
 2. **Verify the Canvas side.** `python3 tools/canvas_smoke.py https://yourschool.instructure.com`
    Token input is hidden and never stored. Add `--fixtures` to capture your own
    sanitized responses into the gitignored `tests/fixtures/live/`.
-3. **Install the Registrar.** Paste `bot/INSTRUCTIONS.md` as the instructions,
-   add every `skills/*/SKILL.md`, add every `routines/*.md`. That alone is the
-   whole product. The [Tutor and Advocate](bots/README.md) are optional and can
-   wait until you know you want them.
+3. **Install the Registrar** from [`dist/registrar/`](dist/registrar/) — the
+   paste-ready bundle. Full steps in [`docs/INSTALL.md`](docs/INSTALL.md).
+   That alone is the whole product; the [Tutor and Advocate](bots/README.md)
+   are optional and can wait until you know you want them.
 4. **Run [`PUBLISH_CHECKLIST.md`](PUBLISH_CHECKLIST.md) before exporting the
    template.** It has the greps that catch a committed token.
 5. **Record per [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md).**
@@ -44,6 +44,8 @@ When you sit down, in this order:
 | [`docs/THREAT_MODEL.md`](docs/THREAT_MODEL.md) | What the bot holds, what could go wrong, and what stops it. |
 | `docs/demo/` | Animated walkthrough, built for screen capture. |
 | `tests/fixtures/` | Canvas responses covering weighted and unweighted courses, a 403 course, a 404 endpoint, eight announcements chosen to break a naive classifier, six office-hours formats, a group assignment, and last week's snapshot. |
+| [`dist/`](dist/MANIFEST.md) | **The paste-ready templates.** Generated from the repo; this is what you install. |
+| [`docs/INSTALL.md`](docs/INSTALL.md) | The install sequence, and the one test to run before any of it. |
 | `tools/` | Local only. Never ships in the template. |
 
 ## Verifying
@@ -57,12 +59,15 @@ python3 tools/verify_skills.py      # deadline windows, dedupe, quiet hours, cla
 
 `grade_model_ref.py` currently reports **drift 0.0** against Canvas's
 `computed_current_score` on both a weighted and an unweighted course.
-`verify_skills.py` is **120/120**, covering every skill whose logic is decidable
+`verify_skills.py` is **130/130**, covering every skill whose logic is decidable
 without a live API, the handoff protocol's forbidden payloads, and the repo's
 own integrity — frontmatter, routine wiring, stale field references, and a
-token-shaped-string sweep over every doc and fixture. `extension-email` is the
-one skill it can't reach: it generates prose, and there is nothing honest to
-assert about that offline.
+token-shaped-string sweep over every doc and fixture. It also asserts the
+packaging: that `canvas-core` ships only to the Registrar, that no companion
+carries a Canvas-reading skill, that a solo Registrar carries every skill in
+the repo, and that `dist/` matches a fresh deterministic build.
+`extension-email` is the one skill it can't reach: it generates prose, and
+there is nothing honest to assert about that offline.
 
 ## What ships in the template
 

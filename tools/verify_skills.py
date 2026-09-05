@@ -586,6 +586,46 @@ check("repo", "live captures are gitignored",
       "tests/fixtures/live/" in (ROOT / ".gitignore").read_text(), True)
 
 
+# ── packaging ─────────────────────────────────────────────────────────────
+sys.path.insert(0, str(ROOT / "tools"))
+import build_template as BT                                    # noqa: E402
+
+REG = set(BT.OWNERSHIP["registrar"]["skills"])
+TUT = set(BT.OWNERSHIP["tutor"]["skills"])
+ADV = set(BT.OWNERSHIP["advocate"]["skills"])
+ALL_SKILLS = {d.name for d in SKILLS.iterdir() if d.is_dir()}
+SOLO = REG | set(BT.SOLO_EXTRA)
+
+check("packaging", "canvas-core ships only to the Registrar",
+      sorted(b for b, sp in BT.OWNERSHIP.items() if "canvas-core" in sp["skills"]),
+      ["registrar"])
+check("packaging", "no companion carries a Canvas-reading skill",
+      sorted((TUT | ADV) & {"canvas-core", "grade-model", "daily-brief",
+                            "deadline-guard", "announcement-digest"}), [])
+check("packaging", "the handoff protocol ships to every bot",
+      sorted(b for b, sp in BT.OWNERSHIP.items() if "handoff" in sp["skills"]),
+      ["advocate", "registrar", "tutor"])
+check("packaging", "a solo Registrar carries every skill in the repo",
+      sorted(ALL_SKILLS - SOLO), [])
+check("packaging", "every routine is owned by exactly one bot",
+      sorted(r.stem for r in (ROOT / "routines").glob("*.md")
+             if sum(r.stem in sp["routines"] for sp in BT.OWNERSHIP.values()) != 1), [])
+check("packaging", "every bot's routines name real files",
+      sorted(r for sp in BT.OWNERSHIP.values() for r in sp["routines"]
+             if not (ROOT / "routines" / f"{r}.md").exists()), [])
+check("packaging", "every bot's skills name real folders",
+      sorted(s_ for sp in BT.OWNERSHIP.values() for s_ in sp["skills"]
+             if s_ not in ALL_SKILLS), [])
+
+built = BT.generate()
+check("packaging", "the build emits nothing secret-shaped",
+      sorted(p_ for p_, b in built.items() if BT.SECRET.search(b)), [])
+check("packaging", "dist/ matches a fresh build",
+      sorted(p_ for p_, b in built.items()
+             if not (BT.DIST / p_).exists() or (BT.DIST / p_).read_text() != b), [])
+check("packaging", "the build is deterministic", BT.generate() == built, True)
+
+
 # ── report ─────────────────────────────────────────────────────────────────
 width = max(len(n) for _, n, _, _, _ in results) + 2
 group = None
