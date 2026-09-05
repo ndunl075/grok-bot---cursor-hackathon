@@ -347,6 +347,34 @@ check("syllabus-ingest", "a genuinely new item proposes nothing to match",
       matches({"name": "Final Project", "due": "2026-12-08T03:59:00Z"}, CANVAS), None)
 
 
+# ── connector-core ────────────────────────────────────────────────────────
+def connector_action(state, requested, prompted_already):
+    """skills/connector-core/SKILL.md. A missing connector never blocks the
+    Canvas path; it only changes where the value is delivered."""
+    if state == "connected":
+        return "use_connector"
+    if state == "absent":
+        return "fallback_silent"
+    if requested:
+        return "fallback_explain"          # they asked; say why it went elsewhere
+    return "fallback_silent" if prompted_already else "fallback_offer_once"
+
+
+check("connector-core", "connected uses it",
+      connector_action("connected", False, False), "use_connector")
+check("connector-core", "declared-but-unauthorized offers once, unprompted",
+      connector_action("declared", False, False), "fallback_offer_once")
+check("connector-core", "and never offers twice",
+      connector_action("declared", False, True), "fallback_silent")
+check("connector-core", "an explicit request always gets an explanation",
+      connector_action("declared", True, True), "fallback_explain")
+check("connector-core", "an undeclared connector is never mentioned",
+      connector_action("absent", True, False), "fallback_silent")
+check("connector-core", "no state ever returns 'block'",
+      {connector_action(s_, r, p) for s_ in ("connected", "declared", "absent")
+       for r in (True, False) for p in (True, False)} & {"block", "error"}, set())
+
+
 # ── report ─────────────────────────────────────────────────────────────────
 width = max(len(n) for _, n, _, _, _ in results) + 2
 group = None

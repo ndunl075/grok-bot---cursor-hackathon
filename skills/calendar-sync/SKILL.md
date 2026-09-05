@@ -9,10 +9,15 @@ Optional. `Config.calendar_sync` defaults to `false` and the first-run flow does
 not ask about it — offer it later, once the bot has proven useful, because
 asking for calendar access in the first sixty seconds costs installs.
 
-Uses the first-party Google Calendar integration. That integration travels in a
-template as a *declared requirement*, not as an authorization: whoever installs
-the template connects their own account or the skill stays inert. Say so rather
-than letting sync silently do nothing.
+Uses the first-party Google Calendar integration through the contract in
+[`skills/connector-core/SKILL.md`](../connector-core/SKILL.md). Read that first.
+The short version: the template declares this connector, it does not authorize
+it, so probe for `connected` before every run and treat `declared` as a normal
+state rather than an error.
+
+**No-connector path:** deadlines keep arriving in the morning brief, exactly as
+they do today. Calendar sync is a nicer surface for information the student
+already gets, never a precondition for getting it.
 
 ## A dedicated calendar, never the primary one
 
