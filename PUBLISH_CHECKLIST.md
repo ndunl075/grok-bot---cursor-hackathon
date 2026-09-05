@@ -49,11 +49,28 @@ first-party integrations. They do not carry MCP servers, scripts, or keys.
       their own account, so say that in the description rather than letting sync
       silently no-op for them.
 
+## 3b. If you are publishing companions
+
+Each bot is a separate template. Export them separately and check each.
+
+- [ ] **Registrar:** token stripped, per §1. It is the only one that ever had one.
+- [ ] **Tutor / Advocate:** confirm no Canvas token is in memory at all. If one
+      is, something violated the handoff rules and the token must be rotated,
+      not just deleted.
+- [ ] Companion memories hold no course names, no teammate names, no instructor
+      addresses. They should hold study items and drafts only, and those go too.
+- [ ] Each companion's description says it requires the Registrar. Installed
+      alone they do nothing, and an installer should learn that before they
+      install, not after.
+
 ## 4. Fresh-install test
 
 - [ ] Install the template on a second account with no prior state.
 - [ ] Time from install to first correct brief. Target < 60s. Record the number.
 - [ ] Confirm the bot asks for URL and token and does not assume either.
+- [ ] **Install the Registrar alone and confirm every feature still works** —
+      quizzing, email drafting, syllabus reading. Companions are additive; if
+      anything is missing without them, rule 3 in `bots/README.md` is broken.
 - [ ] Confirm no course name from your account appears anywhere.
 
 ## 5. Rotate

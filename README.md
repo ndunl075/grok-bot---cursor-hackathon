@@ -23,8 +23,10 @@ When you sit down, in this order:
 2. **Verify the Canvas side.** `python3 tools/canvas_smoke.py https://yourschool.instructure.com`
    Token input is hidden and never stored. Add `--fixtures` to capture your own
    sanitized responses into the gitignored `tests/fixtures/live/`.
-3. **Install the bot.** Paste `bot/INSTRUCTIONS.md` as the instructions, add
-   every `skills/*/SKILL.md`, add every `routines/*.md`.
+3. **Install the Registrar.** Paste `bot/INSTRUCTIONS.md` as the instructions,
+   add every `skills/*/SKILL.md`, add every `routines/*.md`. That alone is the
+   whole product. The [Tutor and Advocate](bots/README.md) are optional and can
+   wait until you know you want them.
 4. **Run [`PUBLISH_CHECKLIST.md`](PUBLISH_CHECKLIST.md) before exporting the
    template.** It has the greps that catch a committed token.
 5. **Record per [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md).**
@@ -34,7 +36,8 @@ When you sit down, in this order:
 | | |
 |---|---|
 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | The build contract. Data model, phases, what shipped and what was cut. |
-| `bot/` | Identity, first-run flow, failure modes; and the memory persistence contract. |
+| `bot/` | The Registrar's identity and first-run flow, and the shared memory contract. |
+| [`bots/`](bots/README.md) | The optional Tutor and Advocate companions, and the four rules that keep multi-bot from making things worse. |
 | `skills/` | Twelve: canvas-core, grade-model, daily-brief, deadline-guard, announcement-digest, study-engine, weekly-retro, office-hours-finder, group-project-tracker, calendar-sync, extension-email, syllabus-ingest. |
 | `routines/` | All eight, with dedupe, precedence and quiet-hours semantics. |
 | [`docs/CANVAS_API.md`](docs/CANVAS_API.md) | The Canvas gotchas that each cost a day. |

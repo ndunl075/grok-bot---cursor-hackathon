@@ -449,6 +449,102 @@ check("drive-archive", "writes are confined to the Canvas Assistant folder",
       [True, False, False, False])
 
 
+# ── handoff (multi-bot) ───────────────────────────────────────────────────
+FORBIDDEN = re.compile(
+    r"token|access_key|bearer|feeds/calendars/user_|oauth|refresh_token"
+    r"|teammate|classmate|instructor_email|peer_", re.I)
+EDGES = {("registrar", "tutor"): {"quiz_prep"},
+         ("registrar", "advocate"): {"draft_email", "find_help", "ingest_syllabus"},
+         ("tutor", "registrar"): {"report_back"},
+         ("advocate", "registrar"): {"report_back"}}
+REQUIRED = {
+    "quiz_prep": {"exam_name", "exam_date", "topics", "source_refs", "impact_pct"},
+    "draft_email": {"assignment_name", "due_at", "ask", "progress"},
+    "find_help": {"reason", "current_pct", "ceiling_pct"},
+    "ingest_syllabus": {"raw_text", "existing_assignments"},
+    "report_back": {"summary"},
+}
+
+
+def leaks(node):
+    """Any forbidden key OR value anywhere in the payload."""
+    if isinstance(node, dict):
+        return any(FORBIDDEN.search(str(k)) or leaks(v) for k, v in node.items())
+    if isinstance(node, list):
+        return any(leaks(v) for v in node)
+    return bool(FORBIDDEN.search(str(node)))
+
+
+def accept(h, now=TUE):
+    if leaks(h.get("context", {})) or leaks({k: v for k, v in h.items()
+                                             if k != "context"}):
+        return "drop_forbidden"
+    if EDGES.get((h["from"], h["to"]), set()) and h["intent"] not in \
+            EDGES[(h["from"], h["to"])]:
+        return "drop_edge"
+    if (h["from"], h["to"]) not in EDGES:
+        return "drop_edge"
+    if iso(h["expires_at"]) <= now:
+        return "hand_back_stale"
+    missing = REQUIRED[h["intent"]] - set(h.get("context", {}))
+    if missing:
+        return "hand_back_incomplete"
+    return "accept"
+
+
+OK = dict(from_="registrar", to="tutor", intent="quiz_prep",
+          expires_at="2026-09-12T00:00:00Z",
+          context=dict(exam_name="Midterm 2", exam_date="2026-09-12T18:00:00Z",
+                       topics=["related rates"], source_refs=["Lecture 14"],
+                       impact_pct=16.7))
+mk = lambda **kw: {**{k.rstrip("_"): v for k, v in OK.items()}, **kw}
+
+check("handoff", "a complete quiz_prep is accepted", accept(mk()), "accept")
+check("handoff", "the Canvas token never travels",
+      accept(mk(context={**OK["context"], "access_token": "1234~abc"})),
+      "drop_forbidden")
+check("handoff", "a token hidden in a value is caught too",
+      accept(mk(context={**OK["context"], "note": "use bearer 1234~abc"})),
+      "drop_forbidden")
+check("handoff", "the ICS feed URL never travels",
+      accept(mk(context={**OK["context"],
+                         "cal": "https://x/feeds/calendars/user_abc.ics"})),
+      "drop_forbidden")
+check("handoff", "a teammate's details never travel",
+      accept(mk(context={**OK["context"], "teammate_ids": ["90002"]})),
+      "drop_forbidden")
+check("handoff", "an incomplete payload is handed back, not guessed",
+      accept(mk(context={"exam_name": "Midterm 2"})), "hand_back_incomplete")
+check("handoff", "an expired handoff is handed back",
+      accept(mk(expires_at="2026-09-01T00:00:00Z")), "hand_back_stale")
+check("handoff", "the tutor may not send an email intent",
+      accept(mk(to="advocate", intent="quiz_prep")), "drop_edge")
+check("handoff", "companions never talk to each other",
+      accept(mk(**{"from": "tutor", "to": "advocate", "intent": "report_back"})),
+      "drop_edge")
+check("handoff", "no companion is ever a Canvas client",
+      [b for b in ("registrar", "tutor", "advocate")
+       if any(e[0] == b and e[1] == "canvas" for e in EDGES)], [])
+
+
+def owner(feature, installed):
+    """Companions are additive. Absent -> the registrar does it itself."""
+    lane = {"quiz": "tutor", "email": "advocate", "brief": "registrar",
+            "nudge": "registrar"}[feature]
+    return lane if lane in installed else "registrar"
+
+
+check("handoff", "solo install still does every feature",
+      [owner(f, {"registrar"}) for f in ("quiz", "email", "brief", "nudge")],
+      ["registrar"] * 4)
+check("handoff", "with companions, lanes route to them",
+      [owner(f, {"registrar", "tutor", "advocate"}) for f in ("quiz", "email")],
+      ["tutor", "advocate"])
+check("handoff", "proactive messaging is never owned by a companion",
+      {owner(f, {"registrar", "tutor", "advocate"}) for f in ("brief", "nudge")},
+      {"registrar"})
+
+
 # ── report ─────────────────────────────────────────────────────────────────
 width = max(len(n) for _, n, _, _, _ in results) + 2
 group = None
