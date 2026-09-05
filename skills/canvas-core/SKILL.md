@@ -23,8 +23,19 @@ transport differs. Note in the first-run flow that the student must add the
 integration, and that it does not travel in a shared template.
 
 **Path C — no outbound HTTP.** See
-[NO_HTTP_FALLBACK.md](NO_HTTP_FALLBACK.md). The bot degrades to the ICS
-calendar feed and pasted data. Grades become unavailable; deadlines survive.
+[NO_HTTP_FALLBACK.md](NO_HTTP_FALLBACK.md).
+
+**Path T — HTTP works, but the student cannot get a token.** Many universities
+disable personal access tokens for students. This is common, it is not the
+student's fault, and it is not a degraded mode: use
+[`ics-feed`](../ics-feed/SKILL.md) for deadlines and
+[`grade-paste`](../grade-paste/SKILL.md) for scores and weights. Together they
+keep the floor, the ceiling, the needed-average, impact ranking, and every
+proactive routine. Only automatic grade-change polling is genuinely lost.
+
+Detect Path T by the token request failing at setup, or the student saying so.
+Do not make them ask an administrator before offering it — most will not get an
+answer, and the product works without one.
 
 Never guess which path you are on. Test with `GET {base}/api/v1/users/self`
 and branch on the result.

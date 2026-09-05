@@ -47,6 +47,28 @@ while logged into Canvas.
 > static HTML notice, so a request there looks like a failure when it is
 > really just a dead host.
 
+## If your school won't give you an access token
+
+Many universities disable personal access tokens for students. **You do not
+need one.** Two sources cover almost everything, and neither requires
+permission from anybody:
+
+| | Source | Gives you |
+|---|---|---|
+| Deadlines | Canvas → **Calendar** → **Calendar Feed** (bottom right), copy the link | Every due date, proactively, on schedule |
+| Grades | Canvas → a course → **Grades**, select the table and paste it in | Scores, points, weights — floor, ceiling and needed-average all work |
+
+Together they keep the ceiling feature, impact ranking, and every routine. The
+only thing genuinely lost is automatic grade-change detection, because nothing
+polls: you re-paste when a grade lands.
+
+The feed URL is a credential. Anyone holding it reads your whole schedule with
+no login, and there is no revoking it short of resetting it in Canvas. Give it
+to the bot and nowhere else.
+
+Tell the bot at setup — "my school doesn't allow access tokens" — and it
+switches paths without further prompting.
+
 ## 1. The Registrar
 
 This is the product. Installed alone it does everything.

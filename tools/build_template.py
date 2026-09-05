@@ -16,14 +16,16 @@ import argparse, hashlib, pathlib, re, sys
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 DIST = ROOT / "dist"
 
-# Which bot owns which skills. A companion never gets canvas-core: it has no
-# token and cannot call the API, so shipping it the client would be a lie.
+# Which bot owns which skills. A companion never gets a Canvas data source —
+# canvas-core, grade-paste or ics-feed. It has no token and no feed URL, so
+# shipping it a reader would be a lie the first call exposes.
 OWNERSHIP = {
     "registrar": {
         "instructions": "bot/INSTRUCTIONS.md",
-        "skills": ["canvas-core", "grade-model", "daily-brief", "deadline-guard",
-                   "announcement-digest", "group-project-tracker", "weekly-retro",
-                   "calendar-sync", "connector-core", "handoff"],
+        "skills": ["canvas-core", "grade-paste", "ics-feed", "grade-model",
+                   "daily-brief", "deadline-guard", "announcement-digest",
+                   "group-project-tracker", "weekly-retro", "calendar-sync",
+                   "connector-core", "handoff"],
         "routines": ["morning-brief", "deadline-48h", "deadline-24h", "grade-watch",
                      "announcements", "group-check", "weekly-retro"],
     },

@@ -8,7 +8,7 @@ the companions are optional and can wait until you want them.
 ## Registrar
 
 - Instructions: `dist/registrar/INSTRUCTIONS.md`
-- Skills: `dist/registrar/SKILLS.md` (16 blocks)
+- Skills: `dist/registrar/SKILLS.md` (18 blocks)
 - Routines: `dist/registrar/ROUTINES.md` (7)
 - Connectors: Google Calendar (optional)
 

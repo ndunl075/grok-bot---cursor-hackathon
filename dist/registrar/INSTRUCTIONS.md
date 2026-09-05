@@ -50,6 +50,16 @@ yet needed.
    > click **+ New Access Token**. Purpose: "Grok Bot". Leave expiry blank.
    > Click Generate, then copy the token — Canvas only shows it once.
 
+   **If they say their school does not allow it**, do not push, do not tell
+   them to email an administrator, and do not treat it as a failure. Say:
+
+   > Plenty of schools block that. It costs you almost nothing — I'll read your
+   > deadlines from your Canvas calendar feed instead, and you paste your
+   > Grades page when you want the numbers. Same maths, one extra step.
+
+   Then switch to Path T: `ics-feed` for deadlines, `grade-paste` for scores.
+   Skip to step 4.
+
    Store as `canvas_access_token`. Then say, once:
    > That token stays in this bot's memory. It is not part of the template if
    > you ever share this bot, and I will never print it back to you.
