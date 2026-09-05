@@ -1,0 +1,75 @@
+{
+  "_fixture_note": "What grade-paste must extract from grades_paste_1101.txt. The scores match assignment_groups_1101.json exactly, so the paste path and the API path must produce the identical RiskScore. That equivalence is the test. The paste also carries an excused row (EX) that must leave the denominator entirely \u2014 neither a zero nor an ungraded item.",
+  "weights": {
+    "Projects": 50.0,
+    "Homework": 20.0,
+    "Exams": 30.0
+  },
+  "weights_source": "user",
+  "assignments": [
+    {
+      "name": "Project 1: Static Site",
+      "group": "Projects",
+      "score": 92.0,
+      "points_possible": 100.0,
+      "graded": true
+    },
+    {
+      "name": "HW1",
+      "group": "Homework",
+      "score": 18.0,
+      "points_possible": 20.0,
+      "graded": true
+    },
+    {
+      "name": "HW2",
+      "group": "Homework",
+      "score": 20.0,
+      "points_possible": 20.0,
+      "graded": true
+    },
+    {
+      "name": "HW3",
+      "group": "Homework",
+      "score": 15.0,
+      "points_possible": 20.0,
+      "graded": true
+    },
+    {
+      "name": "HW4",
+      "group": "Homework",
+      "score": 19.0,
+      "points_possible": 20.0,
+      "graded": true
+    },
+    {
+      "name": "Midterm",
+      "group": "Exams",
+      "score": 72.0,
+      "points_possible": 100.0,
+      "graded": true
+    },
+    {
+      "name": "Project 2: Rails API",
+      "group": "Projects",
+      "score": null,
+      "points_possible": 100.0,
+      "graded": false
+    },
+    {
+      "name": "HW5",
+      "group": "Homework",
+      "score": null,
+      "points_possible": 20.0,
+      "graded": false
+    }
+  ],
+  "expect_riskscore": {
+    "current_pct": 85.6,
+    "floor_pct": 59.0,
+    "ceiling_pct": 88.0
+  },
+  "excused": [
+    "Syllabus quiz"
+  ]
+}

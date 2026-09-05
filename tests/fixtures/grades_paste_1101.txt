@@ -1,0 +1,17 @@
+Name	Group	Due	Submitted	Status	Score	Out of
+Project 1: Static Site	Projects	Aug 27 by 11:59pm	Aug 27 at 10:14pm		92	100
+HW1	Homework	Aug 13 by 11:59pm	Aug 13 at 9:02pm		18	20
+HW2	Homework	Aug 20 by 11:59pm	Aug 20 at 11:41pm		20	20
+HW3	Homework	Aug 27 by 11:59pm	Aug 27 at 11:58pm	late	15	20
+HW4	Homework	Sep 3 by 11:59pm	Sep 3 at 8:15pm		19	20
+Midterm	Exams	Sep 1 by 6pm	Sep 1 at 6:00pm		72	100
+Project 2: Rails API	Projects	Sep 10 by 11:59pm			-	100
+HW5	Homework	Sep 15 by 11:59pm			-	20
+Syllabus quiz	Homework	Aug 8 by 11:59pm	Aug 8 at 4:20pm	excused	EX	10
+
+Assignments are weighted by group:
+Group	Percent
+Projects	50%
+Homework	20%
+Exams	30%
+Total	100%

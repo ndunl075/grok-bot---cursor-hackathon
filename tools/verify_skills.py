@@ -605,9 +605,12 @@ SOLO = REG | set(BT.SOLO_EXTRA)
 check("packaging", "canvas-core ships only to the Registrar",
       sorted(b for b, sp in BT.OWNERSHIP.items() if "canvas-core" in sp["skills"]),
       ["registrar"])
-check("packaging", "no companion carries a Canvas-reading skill",
-      sorted((TUT | ADV) & {"canvas-core", "grade-model", "daily-brief",
-                            "deadline-guard", "announcement-digest"}), [])
+check("packaging", "no companion carries a Canvas data source",
+      sorted((TUT | ADV) & {"canvas-core", "grade-paste", "ics-feed",
+                            "grade-model", "daily-brief", "deadline-guard",
+                            "announcement-digest"}), [])
+check("packaging", "the no-token path ships with the Registrar",
+      sorted({"grade-paste", "ics-feed"} - REG), [])
 check("packaging", "the handoff protocol ships to every bot",
       sorted(b for b, sp in BT.OWNERSHIP.items() if "handoff" in sp["skills"]),
       ["advocate", "registrar", "tutor"])
@@ -630,6 +633,111 @@ check("packaging", "dist/ matches a fresh build",
       sorted(p_ for p_, b in built.items()
              if not (BT.DIST / p_).exists() or (BT.DIST / p_).read_text() != b), [])
 check("packaging", "the build is deterministic", BT.generate() == built, True)
+
+
+# ── grade-paste / ics-feed (the no-token path) ────────────────────────────
+UNGRADED = {"-", "\u2013", "", "n/a", "na"}
+EXCUSED = {"ex", "excused"}
+
+
+def parse_paste(text):
+    """skills/grade-paste/SKILL.md. Last two columns are score and points."""
+    rows, weights, in_w = [], {}, False
+    for raw in text.splitlines():
+        line = raw.rstrip()
+        if not line.strip():
+            continue
+        if line.lower().startswith("assignments are weighted"):
+            in_w = True
+            continue
+        cells = [c.strip() for c in line.split("\t")]
+        if in_w:
+            if len(cells) == 2 and cells[1].endswith("%"):
+                name, pct = cells[0], cells[1].rstrip("%")
+                if name.lower() not in ("group", "total"):
+                    weights[name] = float(pct)
+            continue
+        if cells[0].lower() == "name" or len(cells) < 3:
+            continue
+        score_s, out_s = cells[-2].lower(), cells[-1]
+        try:
+            out = float(out_s.replace(",", ""))
+        except ValueError:
+            continue                                  # not an assignment row
+        if score_s in EXCUSED or "excused" in [c.lower() for c in cells]:
+            continue                                  # leaves the denominator
+        graded = score_s not in UNGRADED
+        rows.append(dict(name=cells[0], group=cells[1],
+                         score=float(score_s) if graded else None,
+                         points_possible=out, graded=graded))
+    return rows, weights
+
+
+def score_from_paste(rows, weights):
+    by_group = {}
+    for r in rows:
+        by_group.setdefault(r["group"], []).append(r)
+    cur = flr = head = 0.0
+    live_w = 0.0
+    for g, items in by_group.items():
+        w = weights[g]
+        total = sum(i["points_possible"] for i in items)
+        gp = sum(i["points_possible"] for i in items if i["graded"])
+        earned = sum(i["score"] for i in items if i["graded"])
+        if gp > 0:
+            cur += earned / gp * w
+            live_w += w
+        flr += earned / total * w
+        head += (total - gp) / total * w
+    return (round(cur / live_w * 100, 1), round(flr, 1), round(flr + head, 1))
+
+
+paste_txt = (FIX / "grades_paste_1101.txt").read_text()
+exp = load("grades_paste_expected.json")
+rows, weights = parse_paste(paste_txt)
+
+check("grade-paste", "weights table parsed", weights, exp["weights"])
+check("grade-paste", "every assignment row found, excused excluded",
+      len(rows), len(exp["assignments"]))
+check("grade-paste", "an excused row leaves the denominator entirely",
+      [r["name"] for r in rows if r["name"] in exp["excused"]], [])
+check("grade-paste", "'-' is ungraded, never zero",
+      sorted(r["name"] for r in rows if not r["graded"]),
+      ["HW5", "Project 2: Rails API"])
+check("grade-paste", "score comes from the last two columns, not the due date",
+      next(r["score"] for r in rows if r["name"] == "Midterm"), 72.0)
+check("grade-paste", "a late row still counts its score",
+      next(r["score"] for r in rows if r["name"] == "HW3"), 15.0)
+
+paste_score = score_from_paste(rows, weights)
+api_score = (now_["CSE 3901"]["current_pct"], now_["CSE 3901"]["floor_pct"],
+             now_["CSE 3901"]["ceiling_pct"])
+check("grade-paste", "the paste path equals the API path exactly",
+      paste_score, api_score)
+check("grade-paste", "...and equals Canvas's own reported score",
+      paste_score[0], now_["CSE 3901"]["canvas_reported"])
+
+
+def parse_ics_summary(summary):
+    """SUMMARY carries the course code in trailing brackets."""
+    m = re.match(r"^(.*?)\s*\[([^\]]+)\]\s*$", summary)
+    return (m.group(1), m.group(2)) if m else (summary, None)
+
+
+def ics_uid_assignment(uid):
+    m = re.match(r"^event-assignment-(\d+)@", uid)
+    return m.group(1) if m else None
+
+
+check("ics-feed", "course code split out of SUMMARY",
+      parse_ics_summary("Project 2: Rails API [CSE 3901]"),
+      ("Project 2: Rails API", "CSE 3901"))
+check("ics-feed", "a summary with no course still parses",
+      parse_ics_summary("Office hours"), ("Office hours", None))
+check("ics-feed", "assignment id recovered from UID, so dedupe still works",
+      ics_uid_assignment("event-assignment-20102@school.instructure.com"), "20102")
+check("ics-feed", "non-assignment events are skipped",
+      ics_uid_assignment("event-calendar-99@school.instructure.com"), None)
 
 
 # ── report ─────────────────────────────────────────────────────────────────
