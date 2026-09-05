@@ -1,0 +1,32 @@
+[
+  {
+    "id": "1101", "name": "Web Application Development", "course_code": "CSE 3901",
+    "apply_assignment_group_weights": true,
+    "term": { "id": "51", "name": "Fall 2026" },
+    "enrollments": [{ "type": "student", "computed_current_score": 87.4 }]
+  },
+  {
+    "id": "1102", "name": "Calculus III", "course_code": "MATH 2153",
+    "apply_assignment_group_weights": false,
+    "term": { "id": "51", "name": "Fall 2026" },
+    "enrollments": [{ "type": "student", "computed_current_score": 81.3 }]
+  },
+  {
+    "id": "1103", "name": "Mechanics", "course_code": "PHYS 1250",
+    "apply_assignment_group_weights": true,
+    "term": { "id": "51", "name": "Fall 2026" },
+    "enrollments": [{ "type": "student", "computed_current_score": 91.0 }]
+  },
+  {
+    "id": "1104", "name": "First-Year Writing", "course_code": "ENGL 1110",
+    "apply_assignment_group_weights": true,
+    "term": { "id": "51", "name": "Fall 2026" },
+    "enrollments": [{ "type": "student", "computed_current_score": 94.0 }]
+  },
+  {
+    "id": "1105", "name": "Modern World History", "course_code": "HIST 2610",
+    "access_restricted_by_date": false,
+    "term": { "id": "51", "name": "Fall 2026" },
+    "_fixture_note": "GET /courses/1105/assignment_groups returns 403. See errors.json."
+  }
+]

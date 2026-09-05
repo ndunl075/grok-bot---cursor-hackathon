@@ -1,0 +1,12 @@
+{
+  "GET /courses/1105/assignment_groups": {
+    "status": 403,
+    "body": { "status": "unauthorized", "errors": [{ "message": "user not authorized to perform that action" }] },
+    "_expected_behavior": "Mark HIST 2610 unavailable. Continue with the other four courses. Mention it once, do not repeat daily."
+  },
+  "GET /courses/1101/files": {
+    "status": 404,
+    "body": { "errors": [{ "message": "The specified resource does not exist." }] },
+    "_expected_behavior": "Files tab is disabled. Fall back to module items of type File. Not an error."
+  }
+}

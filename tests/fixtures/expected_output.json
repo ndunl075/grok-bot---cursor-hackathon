@@ -1,0 +1,59 @@
+{
+  "CSE 3901": {
+    "course_id": "1101",
+    "weights_source": "canvas",
+    "current_pct": 87.4,
+    "floor_pct": 60.8,
+    "ceiling_pct": 89.8,
+    "headroom_pct": 29.0,
+    "canvas_reported": 87.4,
+    "drift": 0.0,
+    "target_pct": 90.0,
+    "target_reachable": false,
+    "needed_avg_on_remaining": 100.7,
+    "at_risk": true,
+    "drivers": [
+      {
+        "name": "Project 2: Rails API",
+        "impact_pct": 25.0,
+        "due_at": "2026-09-11T03:59:00Z"
+      },
+      {
+        "name": "HW5",
+        "impact_pct": 4.0,
+        "due_at": "2026-09-16T03:59:00Z"
+      }
+    ]
+  },
+  "MATH 2153": {
+    "course_id": "1102",
+    "weights_source": "unknown",
+    "current_pct": 81.3,
+    "floor_pct": 54.6,
+    "ceiling_pct": 87.9,
+    "headroom_pct": 33.3,
+    "canvas_reported": 81.3,
+    "drift": 0.0,
+    "target_pct": 90.0,
+    "target_reachable": false,
+    "needed_avg_on_remaining": 106.3,
+    "at_risk": true,
+    "drivers": [
+      {
+        "name": "Midterm 2",
+        "impact_pct": 16.7,
+        "due_at": "2026-09-12T18:00:00Z"
+      },
+      {
+        "name": "Quiz 3",
+        "impact_pct": 11.1,
+        "due_at": "2026-09-24T18:00:00Z"
+      },
+      {
+        "name": "WebAssign 6",
+        "impact_pct": 5.6,
+        "due_at": "2026-09-16T03:59:00Z"
+      }
+    ]
+  }
+}

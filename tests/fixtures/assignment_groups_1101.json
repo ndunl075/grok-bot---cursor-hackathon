@@ -1,0 +1,38 @@
+[
+  {
+    "id": "9001", "name": "Projects", "group_weight": 50.0,
+    "assignments": [
+      { "id": "20101", "course_id": "1101", "assignment_group_id": "9001",
+        "name": "Project 1: Static Site", "points_possible": 100.0,
+        "due_at": "2026-08-28T03:59:00Z",
+        "submission": { "workflow_state": "graded", "score": 92.0, "cached_due_date": "2026-08-28T03:59:00Z" } },
+      { "id": "20102", "course_id": "1101", "assignment_group_id": "9001",
+        "name": "Project 2: Rails API", "points_possible": 100.0,
+        "due_at": "2026-09-11T03:59:00Z",
+        "submission": { "workflow_state": "unsubmitted", "score": null, "cached_due_date": "2026-09-11T03:59:00Z" } }
+    ]
+  },
+  {
+    "id": "9002", "name": "Homework", "group_weight": 20.0,
+    "assignments": [
+      { "id": "20111", "name": "HW1", "course_id": "1101", "assignment_group_id": "9002", "points_possible": 20.0,
+        "due_at": "2026-08-14T03:59:00Z", "submission": { "workflow_state": "graded", "score": 18.0 } },
+      { "id": "20112", "name": "HW2", "course_id": "1101", "assignment_group_id": "9002", "points_possible": 20.0,
+        "due_at": "2026-08-21T03:59:00Z", "submission": { "workflow_state": "graded", "score": 20.0 } },
+      { "id": "20113", "name": "HW3", "course_id": "1101", "assignment_group_id": "9002", "points_possible": 20.0,
+        "due_at": "2026-08-28T03:59:00Z", "submission": { "workflow_state": "graded", "score": 15.0 } },
+      { "id": "20114", "name": "HW4", "course_id": "1101", "assignment_group_id": "9002", "points_possible": 20.0,
+        "due_at": "2026-09-04T03:59:00Z", "submission": { "workflow_state": "graded", "score": 19.0 } },
+      { "id": "20115", "name": "HW5", "course_id": "1101", "assignment_group_id": "9002", "points_possible": 20.0,
+        "due_at": "2026-09-16T03:59:00Z", "submission": { "workflow_state": "unsubmitted", "score": null } }
+    ]
+  },
+  {
+    "id": "9003", "name": "Exams", "group_weight": 30.0,
+    "assignments": [
+      { "id": "20121", "name": "Midterm", "course_id": "1101", "assignment_group_id": "9003",
+        "quiz_id": "4401", "points_possible": 100.0,
+        "due_at": "2026-09-02T18:00:00Z", "submission": { "workflow_state": "graded", "score": 78.0 } }
+    ]
+  }
+]

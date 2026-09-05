@@ -1,0 +1,29 @@
+[
+  {
+    "id": "9101", "name": "Homework", "group_weight": 0.0,
+    "_fixture_note": "apply_assignment_group_weights is false on course 1102, so group_weight is meaningless. weights_source = unknown.",
+    "assignments": [
+      { "id": "20201", "name": "WebAssign 1", "course_id": "1102", "assignment_group_id": "9101", "points_possible": 10.0, "due_at": "2026-08-12T03:59:00Z", "submission": { "workflow_state": "graded", "score": 9.0 } },
+      { "id": "20202", "name": "WebAssign 2", "course_id": "1102", "assignment_group_id": "9101", "points_possible": 10.0, "due_at": "2026-08-19T03:59:00Z", "submission": { "workflow_state": "graded", "score": 10.0 } },
+      { "id": "20203", "name": "WebAssign 3", "course_id": "1102", "assignment_group_id": "9101", "points_possible": 10.0, "due_at": "2026-08-26T03:59:00Z", "submission": { "workflow_state": "graded", "score": 7.0 } },
+      { "id": "20204", "name": "WebAssign 4", "course_id": "1102", "assignment_group_id": "9101", "points_possible": 10.0, "due_at": "2026-09-02T03:59:00Z", "submission": { "workflow_state": "graded", "score": 8.0 } },
+      { "id": "20205", "name": "WebAssign 5", "course_id": "1102", "assignment_group_id": "9101", "points_possible": 10.0, "due_at": "2026-09-09T03:59:00Z", "submission": { "workflow_state": "graded", "score": 10.0 } },
+      { "id": "20206", "name": "WebAssign 6", "course_id": "1102", "assignment_group_id": "9101", "points_possible": 10.0, "due_at": "2026-09-16T03:59:00Z", "submission": { "workflow_state": "unsubmitted", "score": null } }
+    ]
+  },
+  {
+    "id": "9102", "name": "Quizzes", "group_weight": 0.0,
+    "assignments": [
+      { "id": "20211", "name": "Quiz 1", "course_id": "1102", "assignment_group_id": "9102", "quiz_id": "4501", "points_possible": 20.0, "due_at": "2026-08-20T18:00:00Z", "submission": { "workflow_state": "graded", "score": 16.0 } },
+      { "id": "20212", "name": "Quiz 2", "course_id": "1102", "assignment_group_id": "9102", "quiz_id": "4502", "points_possible": 20.0, "due_at": "2026-09-03T18:00:00Z", "submission": { "workflow_state": "graded", "score": 14.0 } },
+      { "id": "20213", "name": "Quiz 3", "course_id": "1102", "assignment_group_id": "9102", "quiz_id": "4503", "points_possible": 20.0, "due_at": "2026-09-24T18:00:00Z", "submission": { "workflow_state": "unsubmitted", "score": null } }
+    ]
+  },
+  {
+    "id": "9103", "name": "Exams", "group_weight": 0.0,
+    "assignments": [
+      { "id": "20221", "name": "Midterm 1", "course_id": "1102", "assignment_group_id": "9103", "quiz_id": "4511", "points_possible": 100.0, "due_at": "2026-08-27T18:00:00Z", "submission": { "workflow_state": "graded", "score": 81.0 } },
+      { "id": "20222", "name": "Midterm 2", "course_id": "1102", "assignment_group_id": "9103", "quiz_id": "4512", "points_possible": 100.0, "due_at": "2026-09-12T18:00:00Z", "submission": { "workflow_state": "unsubmitted", "score": null } }
+    ]
+  }
+]

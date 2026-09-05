@@ -1,0 +1,8 @@
+.env
+.env.*
+*.token
+secrets/
+tests/fixtures/live/
+.DS_Store
+node_modules/
+__pycache__/

@@ -1,0 +1,11 @@
+[
+  { "id": "31001", "context_code": "course_1103", "title": "No lecture Wednesday",
+    "posted_at": "2026-09-08T14:20:00Z",
+    "message": "<p>I'm at a conference Wednesday, so there is no lecture on 9/9. The recitation still meets. Office hours move to Thursday 2-4pm.</p>" },
+  { "id": "31002", "context_code": "course_1101", "title": "Project 2 spec clarification",
+    "posted_at": "2026-09-08T22:05:00Z",
+    "message": "<p>A few of you asked about auth. You may use any session library. The deadline is unchanged: Thursday 11:59pm.</p>" },
+  { "id": "31003", "context_code": "course_1104", "title": "Peer review partners posted",
+    "posted_at": "2026-09-08T16:00:00Z",
+    "message": "<p>Check the Groups tab for your peer review partner for Essay 2.</p>" }
+]

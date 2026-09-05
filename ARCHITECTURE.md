@@ -82,11 +82,18 @@ Assignment:
 
 RiskScore:                      # per course, recomputed by grade-model
   course_id: int
-  current_pct: float
-  projected_pct: float          # assumes avg on remaining
+  current_pct: float            # graded work only
   floor_pct: float              # assumes zero on remaining
-  at_risk: bool                 # projected < user_target or floor < 60
+  ceiling_pct: float            # assumes 100% on remaining = best still reachable
+  headroom_pct: float           # grade points still winnable (ceiling - floor)
+  needed_avg_on_remaining: float | null   # avg needed on remaining to hit target
+  target_reachable: bool        # ceiling >= target
+  at_risk: bool                 # not target_reachable or floor < 60
   drivers: [assignment_id]      # top 3 remaining by impact_pct
+
+  # NOTE: projected_pct was specified here originally ("assumes avg on
+  # remaining") and has been removed. It is algebraically identical to
+  # current_pct — see skills/grade-model/SKILL.md. ceiling/needed replace it.
 
 StudyItem:
   course_id: int
