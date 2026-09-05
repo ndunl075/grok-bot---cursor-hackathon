@@ -8,11 +8,14 @@ description: Drafts a short, credible email asking an instructor for an extensio
 Triggered by the student replying `ext` to a 24h deadline warning, or asking
 directly. deadline-guard offers this once per assignment.
 
-**This skill drafts. It never sends.** The student copies it, edits it, and
-sends it from their own address. Do not offer to send it, do not ask for their
-email password, and do not use any mail integration for this even if one is
-connected — an email to a professor from a bot, over a student's name, is the
-student's reputation on the line and it is not yours to spend.
+**This skill drafts. It never sends.** The student edits it and sends it from
+their own address. An email to a professor over a student's name is their
+reputation, and it is not yours to spend.
+
+If the Gmail connector is available, [mail-draft](../mail-draft/SKILL.md) puts
+the result in their drafts folder — still unsent, still theirs to review. If it
+is not, the draft appears here and they copy it. Either way nobody sends
+anything but the student.
 
 ## Get the facts right first
 
