@@ -8,10 +8,19 @@ Ship rule: a working base beats a broken feature pile. Every feature is additive
 
 1. **Template-portable.** Grok Bot templates carry: instructions, selected memories, skills, routines, first-party integrations. They do NOT carry custom MCP servers, scripts, code, API keys, sessions. Anything that must survive template install lives in `bot/`, `skills/`, `routines/`. Anything under `tools/` is optional extra credit and must not be required.
 2. **Zero cost.** No paid services. Canvas REST API + personal access token only. Optional Google Calendar via first-party integration.
-3. **Generic Canvas.** No hardcoded school, course names, or IDs. Must work for any `*.instructure.com` or school-hosted Canvas. Setup = Canvas base URL + token.
+3. **Generic Canvas.** No hardcoded school, course names, or IDs. Must work for any `*.instructure.com` or school-hosted Canvas. Setup = Canvas base URL + token. This applies to the repo itself: no real school host in a committed file, since this repo is public.
 4. **Proactive first.** The product is the routines. Chat-on-demand is secondary.
 5. **Secrets.** Token stored only in bot memory. `PUBLISH_CHECKLIST.md` must be run before exporting the template. Never commit tokens. `.env` is gitignored.
 6. **Verify the Grok Bot skill/routine file format against x.ai/bot/guides before writing the first skill.** If format differs from this doc, update this doc, not the other way around.
+
+> **Capability check: PASSED.** Verified against a live Grok Bot. It performs
+> real authenticated outbound HTTPS: `GET /api/v1/users/self` on a live Canvas
+> host with a junk bearer token returned `401` and
+> `{"errors":[{"message":"Invalid access token."}]}` — Canvas's genuine error
+> shape, as JSON rather than HTML. Skills reach arbitrary hosts, the
+> `Authorization` header is transmitted, and `canvas-core` works as written.
+> **Path A.** `skills/canvas-core/NO_HTTP_FALLBACK.md` stays in the repo for
+> portability to platforms without outbound HTTP, but is not needed here.
 
 ## 1. Repo layout
 
@@ -54,7 +63,7 @@ All skills read/write these shapes via bot memory. Names are canonical; do not i
 
 ```yaml
 Config:
-  canvas_base_url: str          # https://osu.instructure.com
+  canvas_base_url: str          # https://<school>.instructure.com
   timezone: str                 # America/New_York
   brief_time: "07:00"
   quiet_hours: ["23:00","07:00"]
@@ -63,7 +72,7 @@ Config:
 Course:
   id: int
   name: str
-  code: str                     # CSE 3901
+  code: str                     # e.g. CS 2400
   term: str
   weights_source: "canvas" | "user" | "unknown"
   groups: [{id, name, weight_pct}]

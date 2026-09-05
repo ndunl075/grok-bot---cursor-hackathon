@@ -22,13 +22,16 @@ Run top to bottom before exporting the template. Do not skip the greps.
 
 ```bash
 grep -rInE '[0-9]{4}~[A-Za-z0-9]{20,}' . --exclude-dir=.git   # Canvas token shape
-grep -rInE '\.instructure\.com' . --exclude-dir=.git --exclude=ARCHITECTURE.md
+grep -rInE '[a-z0-9-]+\.instructure\.com' . --exclude-dir=.git   # a real school host
 grep -rIn 'Bearer [A-Za-z0-9]' . --exclude-dir=.git
 grep -rInE 'feeds/calendars/user_' . --exclude-dir=.git       # ICS feed is a credential too
 git status --porcelain --ignored tests/fixtures/live/         # captures must stay uncommitted
 ```
 
-All three must return nothing but doc placeholders. A Canvas token looks like
+All four must return nothing but doc placeholders. The `.instructure.com` grep
+deliberately excludes nothing: naming your own school in a committed file is
+the easiest identifying detail to leak, and it reads as harmless right up until
+the repo is public. A Canvas token looks like
 `1234~aBcD...` — the digits before the tilde are the account ID.
 
 - [ ] `git log -p | grep -E '[0-9]{4}~[A-Za-z0-9]{20,}'` returns nothing.
