@@ -1,0 +1,28 @@
+[
+  { "id": "7001", "name": "Unit 3 — Partial Derivatives", "position": 3,
+    "unlock_at": "2026-08-24T04:00:00Z",
+    "items": [
+      { "id": "80011", "type": "File", "title": "Lecture 12 — Chain rule.pdf", "content_id": "60011" },
+      { "id": "80012", "type": "File", "title": "Lecture 13 — Implicit differentiation.pdf", "content_id": "60012" },
+      { "id": "80013", "type": "Page", "title": "Worked examples" }
+    ] },
+  { "id": "7002", "name": "Unit 4 — Related Rates & Optimization", "position": 4,
+    "unlock_at": "2026-09-01T04:00:00Z",
+    "items": [
+      { "id": "80021", "type": "File", "title": "Lecture 14 — Related rates.pdf", "content_id": "60021" },
+      { "id": "80022", "type": "File", "title": "Lecture 15 — L'Hopital.pdf", "content_id": "60022" },
+      { "id": "80023", "type": "Assignment", "title": "WebAssign 6", "content_id": "20206" }
+    ] },
+  { "id": "7003", "name": "Midterm 2", "position": 5,
+    "unlock_at": "2026-09-10T04:00:00Z",
+    "items": [
+      { "id": "80031", "type": "Quiz", "title": "Midterm 2", "content_id": "4512" }
+    ],
+    "_fixture_note": "study-engine sources from modules with position < this one, i.e. 7001 and 7002." },
+  { "id": "7004", "name": "Unit 5 — Multiple Integrals", "position": 6,
+    "unlock_at": "2026-09-17T04:00:00Z",
+    "items": [
+      { "id": "80041", "type": "File", "title": "Lecture 16 — Double integrals.pdf", "content_id": "60041" }
+    ],
+    "_fixture_note": "AFTER the exam. Must NOT be used to generate study items." }
+]

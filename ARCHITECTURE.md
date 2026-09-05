@@ -196,20 +196,27 @@ Rules: respect quiet_hours. Each routine is stateless except last_run + sent_ids
 
 Each agent: own worktree, own `skills/<name>/`, own `routines/<name>.md`, may only read (not edit) `canvas-core`, `MEMORY_SCHEMA.md`, `ARCHITECTURE.md`. Tests run against `tests/fixtures/`, not live API. PR back to main with a 5-line demo transcript.
 
-| Worktree | Model | Scope |
-|---|---|---|
-| ft/deadline-guard | Sonnet | deadline-guard + both routines |
-| ft/announcements | Sonnet | announcement-digest + routine |
-| ft/study-engine | Opus | study-engine + study-drip |
-| ft/syllabus-ingest | Opus | syllabus-ingest |
-| ft/calendar-sync | Sonnet | calendar-sync |
-| ft/weekly-retro | Sonnet | weekly-retro |
-| ft/extension-email | Sonnet | draft extension/office-hours emails from RiskScore context |
-| ft/office-hours-finder | Sonnet | parse syllabus/announcements for office hours, suggest when at_risk |
-| ft/group-project-tracker | Sonnet | detect group assignments, nudge on unsubmitted group members' pieces |
-| ft/demo-script | Sonnet | docs/DEMO_SCRIPT.md + LinkedIn post draft |
+> **Status: cut from ten lanes to four.** Ten half-tested skills is the feature
+> pile this document's own ship rule warns against, and there were ~34 hours on
+> the clock. The four below are built and verified against fixtures; the rest
+> are deferred and belong in the post as "coming", not in the template.
 
-Merge order: deadline-guard → announcements → study-engine → the rest. Anything not merged by Sun 12:00 is cut from the template and mentioned as "coming" in the post.
+| Scope | State |
+|---|---|
+| deadline-guard + both routines | **built** — windows, impact floor, dedupe and quiet hours all asserted in `tools/verify_skills.py` |
+| announcement-digest + routine | **built** — classifier with negation, past-tense and "unchanged" guards, all asserted |
+| study-engine + study-drip | **built** — trigger and module sourcing asserted; question generation is unverifiable without live files |
+| docs/DEMO_SCRIPT.md + post draft | **built** — plus `docs/demo/` as the animated walkthrough |
+| syllabus-ingest | deferred |
+| calendar-sync | deferred |
+| weekly-retro | routine written, shares daily-brief's retro shape; no separate skill |
+| extension-email | deferred |
+| office-hours-finder | deferred |
+| group-project-tracker | deferred |
+
+Two contract changes came out of building it, both recorded in §2 above:
+`projected_pct` was removed as a tautology, and `Assignment.opened` was removed
+as unobtainable from the student-scoped API.
 
 ### Phase 3 — publish (main agent)
 

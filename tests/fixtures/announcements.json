@@ -1,11 +1,45 @@
 [
   { "id": "31001", "context_code": "course_1103", "title": "No lecture Wednesday",
     "posted_at": "2026-09-08T14:20:00Z",
-    "message": "<p>I'm at a conference Wednesday, so there is no lecture on 9/9. The recitation still meets. Office hours move to Thursday 2-4pm.</p>" },
+    "message": "<p>I'm at a conference Wednesday, so there is no lecture on 9/9. The recitation still meets. Office hours move to Thursday 2-4pm.</p>",
+    "_expect": { "class": "schedule_change", "flag": true } },
+
   { "id": "31002", "context_code": "course_1101", "title": "Project 2 spec clarification",
     "posted_at": "2026-09-08T22:05:00Z",
-    "message": "<p>A few of you asked about auth. You may use any session library. The deadline is unchanged: Thursday 11:59pm.</p>" },
+    "message": "<p>A few of you asked about auth. You may use any session library. The deadline is unchanged: Thursday 11:59pm.</p>",
+    "_expect": { "class": "logistics", "flag": false },
+    "_why": "Contains 'deadline' but explicitly says unchanged. Must not classify as due_change." },
+
   { "id": "31003", "context_code": "course_1104", "title": "Peer review partners posted",
     "posted_at": "2026-09-08T16:00:00Z",
-    "message": "<p>Check the Groups tab for your peer review partner for Essay 2.</p>" }
+    "message": "<p>Check the Groups tab for your peer review partner for Essay 2.</p>",
+    "_expect": { "class": "logistics", "flag": false } },
+
+  { "id": "31004", "context_code": "course_1102", "title": "Class IS meeting Thursday",
+    "posted_at": "2026-09-09T11:30:00Z",
+    "message": "<p>Despite the weather advisory, class is not cancelled. We meet as normal in Journalism 300.</p>",
+    "_expect": { "class": "logistics", "flag": false },
+    "_why": "Negation guard. 'not cancelled' must not fire schedule_change." },
+
+  { "id": "31005", "context_code": "course_1103", "title": "Makeup for the cancelled lecture",
+    "posted_at": "2026-09-09T13:00:00Z",
+    "message": "<p>Last week's cancelled lecture has been recorded and posted under Modules.</p>",
+    "_expect": { "class": "logistics", "flag": false },
+    "_why": "Past-tense reference to a prior cancellation. Not a new schedule change." },
+
+  { "id": "31006", "context_code": "course_1101", "title": "HW5 extended",
+    "posted_at": "2026-09-09T15:45:00Z",
+    "message": "<p>Given how Project 2 landed, HW5 is now due Friday 9/18 instead of Wednesday 9/16.</p>",
+    "_expect": { "class": "due_change", "flag": true, "assignment_hint": "HW5" },
+    "_why": "Must invalidate the assignments cache and clear HW5 from sent_ids." },
+
+  { "id": "31007", "context_code": "course_1102", "title": "Quiz 2 grades posted",
+    "posted_at": "2026-09-09T09:00:00Z",
+    "message": "<p>Quiz 2 grades are now available in Canvas. Regrade requests within one week.</p>",
+    "_expect": { "class": "graded", "flag": false } },
+
+  { "id": "31008", "context_code": "course_1103", "title": "Room change for recitation",
+    "posted_at": "2026-09-09T17:10:00Z",
+    "message": "<p>Friday recitation has been relocated to Smith Lab 1009 for the rest of the term.</p>",
+    "_expect": { "class": "schedule_change", "flag": true } }
 ]
