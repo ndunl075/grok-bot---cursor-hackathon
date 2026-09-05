@@ -32,7 +32,7 @@
     "assignments": [
       { "id": "20121", "name": "Midterm", "course_id": "1101", "assignment_group_id": "9003",
         "quiz_id": "4401", "points_possible": 100.0,
-        "due_at": "2026-09-02T18:00:00Z", "submission": { "workflow_state": "graded", "score": 78.0 } }
+        "due_at": "2026-09-02T18:00:00Z", "submission": { "workflow_state": "graded", "score": 72.0 } }
     ]
   }
 ]

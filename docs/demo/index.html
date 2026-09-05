@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>html{color-scheme:light dark}body{margin:0}img{max-width:100%}</style>
+<title>Grade Ceiling</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+</head>
+<body>
+<style>
+/* ── tokens ─────────────────────────────────────────────────────────────
+   Dark-first: the bare :root carries the committed "stage" palette.
+   Light is a consistent swap, defined in both the media query and the stamp.
+   Achromatic by design — every neutral carries a slight cool bias so the
+   greys read as chosen instrument greys, not default #808080.            */
+:root{
+  --stage:#0F1114;  --surface:#171A1E;  --raised:#1E2228;
+  --line:#282D34;   --line-2:#343A43;
+  --ink:#F1F3F5;    --ink-2:#A8AFB8;    --ink-3:#6E767F;
+  --band-locked:#3C434C;  --band-open:#8E979F;  --band-lost:#22262B;
+  --hatch:#3A4048;
+  --glow:rgba(241,243,245,.10);
+  --shadow:0 1px 0 rgba(255,255,255,.04), 0 18px 40px -24px rgba(0,0,0,.9);
+}
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){
+    --stage:#E7E9EC;  --surface:#FFFFFF;  --raised:#F2F4F6;
+    --line:#D6DAE0;   --line-2:#BFC5CD;
+    --ink:#12151A;    --ink-2:#4E555E;    --ink-3:#858D97;
+    --band-locked:#C2C8D0;  --band-open:#5B646E;  --band-lost:#DDE1E6;
+    --hatch:#B6BDC6;
+    --glow:rgba(18,21,26,.07);
+    --shadow:0 1px 0 rgba(255,255,255,.7), 0 18px 40px -26px rgba(20,26,34,.35);
+  }
+}
+:root[data-theme="light"]{
+  --stage:#E7E9EC;  --surface:#FFFFFF;  --raised:#F2F4F6;
+  --line:#D6DAE0;   --line-2:#BFC5CD;
+  --ink:#12151A;    --ink-2:#4E555E;    --ink-3:#858D97;
+  --band-locked:#C2C8D0;  --band-open:#5B646E;  --band-lost:#DDE1E6;
+  --hatch:#B6BDC6;
+  --glow:rgba(18,21,26,.07);
+  --shadow:0 1px 0 rgba(255,255,255,.7), 0 18px 40px -26px rgba(20,26,34,.35);
+}
+
+*{box-sizing:border-box}
+p{margin:0}
+body{
+  background:var(--stage); color:var(--ink);
+  font-family:"Archivo",system-ui,-apple-system,"Segoe UI",sans-serif;
+  font-size:15px; line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+.stage{max-width:1140px; margin:0 auto; padding:44px 28px 64px}
+
+/* ── type roles ─────────────────────────────────────────────────────── */
+.eyebrow{
+  font-size:11px; font-weight:600; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--ink-3); font-stretch:88%;
+}
+h1{
+  font-size:clamp(34px,5.4vw,62px); line-height:.98; margin:14px 0 0;
+  font-weight:800; font-stretch:82%; letter-spacing:-.02em;
+  text-wrap:balance;
+}
+h1 .dim{color:var(--ink-3)}
+.lede{
+  margin:18px 0 0; max-width:60ch; color:var(--ink-2); font-size:16px;
+}
+.num{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace; font-variant-numeric:tabular-nums}
+h2{
+  font-size:12px; font-weight:600; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--ink-3); margin:0 0 16px; font-stretch:88%;
+}
+
+/* ── the instrument (hero) ──────────────────────────────────────────── */
+.instrument{margin-top:48px}
+.scale{
+  position:relative; height:78px; border-radius:3px; overflow:visible;
+  background:var(--band-lost);
+}
+.band{
+  position:absolute; top:0; bottom:0; transform-origin:left center;
+  transition:transform .9s cubic-bezier(.16,1,.3,1);
+}
+.band.locked{left:0; width:20.00%; background:var(--band-locked)}
+.band.open{left:20.00%; width:64.44%; background:var(--band-open)}
+.band.lost{
+  left:84.44%; right:0;
+  background:repeating-linear-gradient(-45deg,
+    var(--hatch) 0 1.5px, transparent 1.5px 8px);
+  border-left:1px solid var(--line-2);
+}
+[data-step]:not(.in) .band{transform:scaleX(0)}
+
+/* markers ride above the scale */
+.mark{
+  position:absolute; top:-9px; bottom:-9px; width:2px; background:var(--ink);
+  transition:opacity .5s ease, transform .7s cubic-bezier(.2,1.3,.35,1);
+}
+.mark::after{
+  content:attr(data-label); position:absolute; left:50%; bottom:calc(100% + 9px);
+  transform:translateX(-50%); white-space:nowrap;
+  font-family:"IBM Plex Mono",monospace; font-size:11px; font-weight:600;
+  letter-spacing:.04em; color:var(--ink);
+}
+.mark.current{left:79.11%}
+.mark.target{left:88.89%; background:var(--ink-3); width:1px}
+.mark.target::after{color:var(--ink-3)}
+
+/* the gap bracket: ceiling → target */
+.gap{
+  position:absolute; left:84.44%; width:4.45%; top:calc(100% + 34px); height:14px;
+  border:1px solid var(--line-2); border-top:none;
+}
+.gap span{
+  position:absolute; left:50%; top:calc(100% + 7px); transform:translateX(-50%);
+  white-space:nowrap; font-family:"IBM Plex Mono",monospace; font-size:11px;
+  color:var(--ink-2); letter-spacing:.03em;
+}
+
+.ticks{position:relative; height:20px; margin-top:8px}
+.tick{
+  position:absolute; top:0; font-family:"IBM Plex Mono",monospace;
+  font-size:11px; color:var(--ink-3); transform:translateX(-50%);
+}
+.tick::before{
+  content:""; position:absolute; left:50%; top:-8px; width:1px; height:5px;
+  background:var(--line-2);
+}
+
+.legend{
+  display:flex; flex-wrap:wrap; gap:26px; margin-top:38px;
+  padding-top:18px; border-top:1px solid var(--line);
+}
+.legend div{display:flex; align-items:baseline; gap:9px; font-size:13px; color:var(--ink-2)}
+.swatch{width:16px; height:9px; border-radius:1px; flex:none; transform:translateY(-1px)}
+.swatch.a{background:var(--band-locked)}
+.swatch.b{background:var(--band-open)}
+.swatch.c{background:repeating-linear-gradient(-45deg,var(--hatch) 0 1.5px,transparent 1.5px 6px); outline:1px solid var(--line-2)}
+.legend b{color:var(--ink); font-weight:600}
+
+/* ── lower grid ─────────────────────────────────────────────────────── */
+.grid{
+  display:grid; grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);
+  gap:44px; margin-top:56px; align-items:start;
+}
+@media (max-width:820px){ .grid{grid-template-columns:1fr; gap:48px} }
+
+/* message thread — a surface, not a phone bezel */
+.thread{
+  background:var(--surface); border:1px solid var(--line); border-radius:14px;
+  padding:18px 18px 22px; box-shadow:var(--shadow);
+}
+.thread-head{
+  display:flex; align-items:center; gap:10px; padding-bottom:14px;
+  border-bottom:1px solid var(--line); margin-bottom:18px;
+}
+.avatar{
+  width:26px; height:26px; border-radius:50%; flex:none;
+  background:var(--raised); border:1px solid var(--line-2);
+  display:grid; place-items:center;
+  font-size:11px; font-weight:800; color:var(--ink-2); font-stretch:80%;
+}
+.thread-head .who{font-size:13px; font-weight:600}
+.thread-head .when{
+  margin-left:auto; font-family:"IBM Plex Mono",monospace;
+  font-size:11px; color:var(--ink-3);
+}
+.msgs{display:flex; flex-direction:column; gap:11px}
+.msg{
+  max-width:88%; padding:11px 14px; border-radius:13px 13px 13px 4px;
+  background:var(--raised); border:1px solid var(--line);
+  font-size:14px; line-height:1.45;
+  transition:opacity .5s ease, transform .6s cubic-bezier(.16,1,.3,1);
+}
+.msg.me{
+  align-self:flex-end; border-radius:13px 13px 4px 13px;
+  background:transparent; border-color:var(--line-2); color:var(--ink-2);
+}
+.msg.key{border-color:var(--line-2); box-shadow:0 0 0 3px var(--glow)}
+.msg .num{font-weight:600}
+[data-step]:not(.in) .msg{opacity:0; transform:translateY(9px)}
+
+/* mechanism panel */
+.mech{display:flex; flex-direction:column; gap:30px}
+.impact{display:flex; flex-direction:column; gap:18px}
+.row{display:grid; grid-template-columns:1fr 52px; gap:14px; align-items:center}
+.row .name{font-size:13px; color:var(--ink-2)}
+.row .name b{color:var(--ink); font-weight:600}
+.row .val{
+  font-family:"IBM Plex Mono",monospace; font-size:13px; text-align:right;
+  color:var(--ink);
+}
+.row .track{
+  grid-column:1/-1; display:block; height:7px; border-radius:2px;
+  background:var(--band-lost); border:1px solid var(--line); overflow:hidden;
+}
+.row .fill{
+  display:block; width:100%; height:100%; background:var(--band-open);
+  transform-origin:left center; transition:transform .8s cubic-bezier(.16,1,.3,1);
+}
+[data-step]:not(.in) .fill{transform:scaleX(0)}
+
+.facts{display:flex; flex-direction:column; border-top:1px solid var(--line)}
+.fact{
+  display:flex; align-items:baseline; gap:16px; padding:13px 0;
+  border-bottom:1px solid var(--line);
+}
+.fact .k{font-size:13px; color:var(--ink-2); flex:1}
+.fact .v{
+  font-family:"IBM Plex Mono",monospace; font-size:15px; font-weight:600;
+  color:var(--ink); white-space:nowrap;
+}
+.fact .v.off{color:var(--ink-3)}
+
+/* ── controls / footer ──────────────────────────────────────────────── */
+.foot{
+  display:flex; flex-wrap:wrap; align-items:center; gap:18px;
+  margin-top:52px; padding-top:20px; border-top:1px solid var(--line);
+}
+button{
+  font:inherit; font-size:13px; font-weight:600; color:var(--ink);
+  background:var(--raised); border:1px solid var(--line-2);
+  padding:9px 18px; border-radius:7px; cursor:pointer;
+  transition:background .15s ease, border-color .15s ease;
+}
+button:hover{background:var(--surface); border-color:var(--ink-3)}
+button:focus-visible{outline:2px solid var(--ink); outline-offset:2px}
+.note{font-size:12.5px; color:var(--ink-3); max-width:62ch}
+.note code{
+  font-family:"IBM Plex Mono",monospace; font-size:11.5px;
+  color:var(--ink-2); background:var(--raised);
+  padding:1px 5px; border-radius:3px; border:1px solid var(--line);
+}
+
+@media (prefers-reduced-motion: reduce){
+  *{transition-duration:0s !important}
+}
+</style>
+
+<div class="stage">
+
+  <p class="eyebrow">Canvas assistant &middot; Grok Bot</p>
+  <h1>Your ceiling is <span class="num">88.0</span>.<br><span class="dim">The A was gone two weeks ago.</span></h1>
+  <p class="lede">
+    Canvas shows a student their current grade. It never shows them the grade
+    they can still reach. This bot computes both, every four hours, and says
+    something only when the answer changed.
+  </p>
+
+  <!-- ── hero instrument ─────────────────────────────────────────────── -->
+  <section class="instrument" data-step="1">
+    <h2>CSE 3901 &mdash; every final grade still available</h2>
+
+    <div class="scale">
+      <div class="band locked"></div>
+      <div class="band open"></div>
+      <div class="band lost"></div>
+      <div class="mark current" data-label="85.6 now"></div>
+      <div class="mark target" data-label="90 target"></div>
+      <div class="gap"><span>2.0 out of reach</span></div>
+    </div>
+
+    <div class="ticks">
+      <span class="tick" style="left:0%">50</span>
+      <span class="tick" style="left:22.22%">60</span>
+      <span class="tick" style="left:44.44%">70</span>
+      <span class="tick" style="left:66.67%">80</span>
+      <span class="tick" style="left:88.89%">90</span>
+    </div>
+
+    <div class="legend">
+      <div><span class="swatch a"></span><span><b>Floor 59.0</b> &mdash; banked, even at zero from here</span></div>
+      <div><span class="swatch b"></span><span><b>29.0 points</b> still winnable</span></div>
+      <div><span class="swatch c"></span><span><b>Above 88.0</b> &mdash; arithmetically closed</span></div>
+    </div>
+  </section>
+
+  <!-- ── thread + mechanism ──────────────────────────────────────────── -->
+  <div class="grid">
+
+    <section class="thread" data-step="2">
+      <div class="thread-head">
+        <span class="avatar">CA</span>
+        <span class="who">Canvas Assistant</span>
+        <span class="when">Tue 7:00 AM</span>
+      </div>
+      <div class="msgs">
+        <p class="msg">Project&nbsp;2 is due Thursday. It&rsquo;s <span class="num">25%</span> of your final grade and you haven&rsquo;t started it.</p>
+        <p class="msg">MATH&nbsp;2153 midterm Friday &mdash; <span class="num">17%</span>. I&rsquo;ll start quizzing you tonight.</p>
+        <p class="msg key">One thing you should know: an A in CSE&nbsp;3901 isn&rsquo;t reachable anymore. Your ceiling is <span class="num">88.0</span>.</p>
+        <p class="msg">The midterm did it. A <span class="num">100</span> on Project&nbsp;2 <em>and</em> HW5 still lands you at <span class="num">88.0</span>.</p>
+        <p class="msg me">so what do I aim at</p>
+        <p class="msg">An <span class="num">85</span> holds. That needs <span class="num">89.7%</span> on what&rsquo;s left &mdash; call it a 90 on Project&nbsp;2. I&rsquo;ll track it and tell you if it slips.</p>
+      </div>
+    </section>
+
+    <section class="mech">
+      <div data-step="3">
+        <h2>What&rsquo;s left, by what it&rsquo;s worth</h2>
+        <div class="impact">
+          <div class="row">
+            <span class="name"><b>Project 2</b> &middot; 100 pts &middot; due Thu</span>
+            <span class="val">25.0%</span>
+            <span class="track"><span class="fill" style="transform:scaleX(.833)"></span></span>
+          </div>
+          <div class="row">
+            <span class="name"><b>HW5</b> &middot; 20 pts &middot; due Sep 16</span>
+            <span class="val">4.0%</span>
+            <span class="track"><span class="fill" style="transform:scaleX(.133)"></span></span>
+          </div>
+          <div class="row">
+            <span class="name">Midterm &middot; 100 pts &middot; graded 72</span>
+            <span class="val" style="color:var(--ink-3)">spent</span>
+            <span class="track"><span class="fill" style="transform:scaleX(1);background:var(--band-locked)"></span></span>
+          </div>
+        </div>
+        <p class="note" style="margin-top:14px">
+          Impact is <code>points &divide; group total &times; group weight</code>, not points possible.
+          HW5 and the midterm are both worth 100&nbsp;points to Canvas. One of them
+          moves the grade seven times as much.
+        </p>
+      </div>
+
+      <div data-step="4">
+        <h2>What it would take</h2>
+        <div class="facts">
+          <div class="fact"><span class="k">Average needed on remaining, for a 90</span><span class="v off">106.9%</span></div>
+          <div class="fact"><span class="k">&hellip; for an 87</span><span class="v off">96.6%</span></div>
+          <div class="fact"><span class="k">&hellip; for an 85</span><span class="v">89.7%</span></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="foot">
+    <button id="replay" type="button">Replay</button>
+    <p class="note">
+      Every figure is computed from <code>tests/fixtures/</code> by
+      <code>tools/grade_model_ref.py</code>, and checked against Canvas&rsquo;s own
+      <code>computed_current_score</code> &mdash; drift <span class="num">0.0</span> on both
+      the weighted and the unweighted course. No live API calls, no invented numbers.
+    </p>
+  </div>
+</div>
+
+<script>
+(function () {
+  var steps = Array.prototype.slice.call(document.querySelectorAll('[data-step]'));
+  var msgs  = Array.prototype.slice.call(document.querySelectorAll('.msg'));
+  var marks = Array.prototype.slice.call(document.querySelectorAll('.mark, .gap'));
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var timers = [];
+
+  // Resting state: everything visible. Motion is a replay of how it got here.
+  function settle() {
+    steps.forEach(function (s) { s.classList.add('in'); });
+    msgs.forEach(function (m) { m.style.opacity = ''; m.style.transform = ''; });
+    marks.forEach(function (m) { m.style.opacity = ''; m.style.transform = ''; });
+  }
+
+  function at(ms, fn) { timers.push(setTimeout(fn, ms)); }
+
+  function play() {
+    timers.forEach(clearTimeout); timers = [];
+    if (reduced) { settle(); return; }
+
+    steps.forEach(function (s) { s.classList.remove('in'); });
+    marks.forEach(function (m) { m.style.opacity = '0'; m.style.transform = 'translateY(6px)'; });
+    void document.body.offsetHeight;                       // flush
+
+    at(120,  function () { steps[0].classList.add('in'); });   // bands draw
+    at(900,  function () { marks[0].style.opacity = ''; marks[0].style.transform = ''; });
+    at(1250, function () { marks[1].style.opacity = ''; marks[1].style.transform = ''; });
+    at(1550, function () { marks[2].style.opacity = ''; marks[2].style.transform = ''; });
+
+    at(1750, function () { steps[1].classList.add('in'); });   // thread container
+    msgs.forEach(function (m, i) {                             // messages, staggered
+      m.style.opacity = '0'; m.style.transform = 'translateY(9px)';
+      at(1850 + i * 620, function () { m.style.opacity = ''; m.style.transform = ''; });
+    });
+
+    at(2400, function () { steps[2].classList.add('in'); });   // impact bars
+    at(3100, function () { steps[3].classList.add('in'); });   // needed table
+  }
+
+  settle();
+  document.getElementById('replay').addEventListener('click', play);
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'r' || e.key === 'R') play();
+  });
+  if (!reduced) at(400, play);
+})();
+</script>
+</body></html>

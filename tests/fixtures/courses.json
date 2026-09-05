@@ -3,7 +3,7 @@
     "id": "1101", "name": "Web Application Development", "course_code": "CSE 3901",
     "apply_assignment_group_weights": true,
     "term": { "id": "51", "name": "Fall 2026" },
-    "enrollments": [{ "type": "student", "computed_current_score": 87.4 }]
+    "enrollments": [{ "type": "student", "computed_current_score": 85.6 }]
   },
   {
     "id": "1102", "name": "Calculus III", "course_code": "MATH 2153",
