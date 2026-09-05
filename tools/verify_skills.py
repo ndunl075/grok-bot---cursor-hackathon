@@ -582,6 +582,15 @@ check("repo", "the handoff protocol carries that rule across the bot boundary",
 check("repo", "every companion bot states it has no Canvas access",
       [d.name for d in sorted((ROOT / "bots").iterdir()) if d.is_dir()
        and "no Canvas access" not in (d / "INSTRUCTIONS.md").read_text()], [])
+KNOWN_PLACEHOLDERS = re.compile(
+    r"(?:school|yourschool|something|example|canvas|x)\.instructure\.com", re.I)
+check("repo", "no real school host anywhere in the tracked tree",
+      sorted({str(f.relative_to(ROOT))
+              for f in list(ROOT.rglob("*.md")) + list(ROOT.rglob("*.py"))
+                       + list(ROOT.rglob("*.json")) + list(ROOT.rglob("*.txt"))
+              if ".git" not in str(f)
+              for m in re.finditer(r"\b([a-z0-9-]+)\.instructure\.com", f.read_text())
+              if not KNOWN_PLACEHOLDERS.fullmatch(m.group(0))}), [])
 check("repo", "no doc tells anyone to test against the dead Free-for-Teacher host",
       [str(f.relative_to(ROOT)) for f in ROOT.rglob("*.md")
        if ".git" not in str(f) and "/dist/" not in str(f)

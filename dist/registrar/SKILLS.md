@@ -1332,7 +1332,7 @@ Standard iCalendar. One `VEVENT` per assignment:
 BEGIN:VEVENT
 DTSTART:20260911T035900Z
 SUMMARY:Project 2: Rails API [CSE 3901]
-UID:event-assignment-20102@osu.instructure.com
+UID:event-assignment-20102@school.instructure.com
 END:VEVENT
 ```
 
