@@ -8,19 +8,44 @@ do not need to clone anything.
 
 Open your Grok Bot and ask it, verbatim:
 
-> Make a GET request to `https://canvas.instructure.com/api/v1/courses` with
-> the header `Authorization: Bearer 1234~notarealtoken` and tell me the exact
-> HTTP status code and response body you get back.
+> Make a GET request to `https://api.github.com/user` with the header
+> `Authorization: Bearer notarealtoken` and tell me the exact HTTP status code
+> and response body you get back.
 
 | What comes back | What it means | What to do |
 |---|---|---|
-| **401**, with a body about invalid access token | The bot can make authenticated requests to arbitrary hosts. Everything here works as written. | Continue below. |
+| **401** and a body containing `"Bad credentials"` | The bot makes authenticated requests to arbitrary hosts. Everything here works as written. | Continue below. |
 | "I can't make web requests" / it describes rather than does | No outbound HTTP. `canvas-core` cannot work as designed. | Read [`skills/canvas-core/NO_HTTP_FALLBACK.md`](../skills/canvas-core/NO_HTTP_FALLBACK.md) and pick a tier before installing. |
 | A prompt to connect an integration | Requests are connector-mediated. Method contracts hold; the transport differs, and the connector will not travel in a shared template. | Continue, and say so in the template description. |
-| **200** with real course data | Something is very wrong — that token is fake. Stop and work out what answered. | Do not proceed. |
+| **200** with a real GitHub user | Stop. That token is fake, so something else answered. | Do not proceed. |
 
-A 401 *from Canvas* is the success case. An error *from the bot* is the
-failure case. They are easy to confuse when skimming.
+**A 401 from the server is the success case. An error from the bot is the
+failure case.** They read almost identically when you skim.
+
+Then confirm it actually made the call rather than describing one, because
+models do the latter and the two are indistinguishable otherwise:
+
+> Did you actually perform that HTTP request just now, or are you describing
+> what it would return? Which tool did you use?
+
+### Then point it at your own Canvas
+
+`api.github.com` proves bearer auth over HTTPS works. Your school's host is the
+one that has to answer:
+
+> Make a GET request to `https://YOURSCHOOL.instructure.com/api/v1/users/self`
+> with the header `Authorization: Bearer 1234~notarealtoken`. Give me the exact
+> status code and body.
+
+A **401** is what you want. If you get **HTML** back instead of JSON, the host
+is wrong — you have hit the web app, an SSO redirect, or a decommissioned
+instance, and no token will fix it. Find the address in your browser's bar
+while logged into Canvas.
+
+> Do not use `canvas.instructure.com` as a test target. That was Instructure's
+> Free-for-Teacher instance and it has been discontinued; it now serves a
+> static HTML notice, so a request there looks like a failure when it is
+> really just a dead host.
 
 ## 1. The Registrar
 

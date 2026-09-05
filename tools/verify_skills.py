@@ -582,6 +582,12 @@ check("repo", "the handoff protocol carries that rule across the bot boundary",
 check("repo", "every companion bot states it has no Canvas access",
       [d.name for d in sorted((ROOT / "bots").iterdir()) if d.is_dir()
        and "no Canvas access" not in (d / "INSTRUCTIONS.md").read_text()], [])
+check("repo", "no doc tells anyone to test against the dead Free-for-Teacher host",
+      [str(f.relative_to(ROOT)) for f in ROOT.rglob("*.md")
+       if ".git" not in str(f) and "/dist/" not in str(f)
+       and re.search(r"(?<!not use `)canvas\.instructure\.com/api", f.read_text())], [])
+check("repo", "canvas-core checks body shape before status class",
+      "before the status class" in (SKILLS / "canvas-core" / "SKILL.md").read_text(), True)
 check("repo", "live captures are gitignored",
       "tests/fixtures/live/" in (ROOT / ".gitignore").read_text(), True)
 

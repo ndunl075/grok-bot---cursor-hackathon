@@ -14,12 +14,14 @@ two weeks ago already closed off the A.
 
 When you sit down, in this order:
 
-1. **Answer the blocking question.** Open your Grok Bot and ask it to
-   `GET https://canvas.instructure.com/api/v1/courses` with a junk bearer
-   token. A `401` back from Canvas means skills can reach arbitrary hosts and
-   `canvas-core` works as written. Anything else means read
+1. **Confirm your bot can make outbound HTTP** — the one thing the whole
+   design rests on. Ask it to `GET https://api.github.com/user` with the header
+   `Authorization: Bearer notarealtoken`. A `401` with `"Bad credentials"`
+   means skills reach arbitrary hosts and `canvas-core` works as written.
+   Anything else means read
    [`skills/canvas-core/NO_HTTP_FALLBACK.md`](skills/canvas-core/NO_HTTP_FALLBACK.md)
-   and pick a tier. Nothing downstream is settled until this is.
+   and pick a tier. Full procedure, and the traps, in
+   [`docs/INSTALL.md`](docs/INSTALL.md).
 2. **Verify the Canvas side.** `python3 tools/canvas_smoke.py https://yourschool.instructure.com`
    Token input is hidden and never stored. Add `--fixtures` to capture your own
    sanitized responses into the gitignored `tests/fixtures/live/`.
