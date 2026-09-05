@@ -14,13 +14,10 @@ two weeks ago already closed off the A.
 
 When you sit down, in this order:
 
-1. **Confirm your bot can make outbound HTTP** — the one thing the whole
-   design rests on. Ask it to `GET https://api.github.com/user` with the header
-   `Authorization: Bearer notarealtoken`. A `401` with `"Bad credentials"`
-   means skills reach arbitrary hosts and `canvas-core` works as written.
-   Anything else means read
-   [`skills/canvas-core/NO_HTTP_FALLBACK.md`](skills/canvas-core/NO_HTTP_FALLBACK.md)
-   and pick a tier. Full procedure, and the traps, in
+1. **Confirm your bot can make outbound HTTP.** Already verified on Grok Bot —
+   a junk bearer token against a live Canvas host returns `401` with Canvas's
+   real JSON error, so `canvas-core` works as written. Re-run it if you are on
+   a different platform: procedure and traps in
    [`docs/INSTALL.md`](docs/INSTALL.md).
 2. **Verify the Canvas side.** `python3 tools/canvas_smoke.py https://yourschool.instructure.com`
    Token input is hidden and never stored. Add `--fixtures` to capture your own
