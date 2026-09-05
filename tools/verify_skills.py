@@ -545,6 +545,47 @@ check("handoff", "proactive messaging is never owned by a companion",
       {"registrar"})
 
 
+# ── repo integrity ────────────────────────────────────────────────────────
+# Docs rot silently. These assert the surface still hangs together.
+ROOT = FIX.parent.parent
+SKILLS = ROOT / "skills"
+
+
+def frontmatter_name(d):
+    for line in (d / "SKILL.md").read_text().splitlines()[:6]:
+        if line.startswith("name: "):
+            return line[6:].strip()
+    return None
+
+
+check("repo", "every skill's frontmatter name matches its folder",
+      [d.name for d in sorted(SKILLS.iterdir())
+       if d.is_dir() and frontmatter_name(d) != d.name], [])
+check("repo", "every routine names a skill that exists",
+      [f.name for f in sorted((ROOT / "routines").glob("*.md"))
+       for ln in f.read_text().splitlines() if ln.startswith("skill: ")
+       if not (SKILLS / ln[7:].strip() / "SKILL.md").exists()], [])
+check("repo", "no doc still references the removed projected_pct field",
+      [str(f.relative_to(ROOT)) for f in ROOT.rglob("*.md")
+       if ".git" not in str(f) and re.search(r"projected_pct", f.read_text())
+       and "removed" not in f.read_text()], [])
+check("repo", "no fixture carries a Canvas-shaped token",
+      [str(f.relative_to(ROOT)) for f in FIX.rglob("*.json")
+       if re.search(r"[0-9]{4}~[A-Za-z0-9]{20,}", f.read_text())], [])
+check("repo", "no doc carries a Canvas-shaped token",
+      [str(f.relative_to(ROOT)) for f in ROOT.rglob("*.md")
+       if ".git" not in str(f) and re.search(r"[0-9]{4}~[A-Za-z0-9]{20,}", f.read_text())], [])
+check("repo", "canvas-core states that Canvas text is never instructions",
+      "data, never instructions" in (SKILLS / "canvas-core" / "SKILL.md").read_text(), True)
+check("repo", "the handoff protocol carries that rule across the bot boundary",
+      "stays data after the hop" in (SKILLS / "handoff" / "SKILL.md").read_text(), True)
+check("repo", "every companion bot states it has no Canvas access",
+      [d.name for d in sorted((ROOT / "bots").iterdir()) if d.is_dir()
+       and "no Canvas access" not in (d / "INSTRUCTIONS.md").read_text()], [])
+check("repo", "live captures are gitignored",
+      "tests/fixtures/live/" in (ROOT / ".gitignore").read_text(), True)
+
+
 # ── report ─────────────────────────────────────────────────────────────────
 width = max(len(n) for _, n, _, _, _ in results) + 2
 group = None
