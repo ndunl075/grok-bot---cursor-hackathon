@@ -408,6 +408,47 @@ check("mail-draft", "no input reaches a send outcome",
        for t in ([], T1, T1_NOEMAIL, T2) for u in (True, False)} & {"send"}, set())
 
 
+# ── drive-archive ─────────────────────────────────────────────────────────
+FOLDER = "Canvas Assistant"
+
+
+def guide_action(existing_names, course, exam):
+    """One guide per exam, updated in place. Never a (1) copy."""
+    name = f"{course} — {exam} study guide"
+    return ("update" if name in existing_names else "create", name)
+
+
+def syllabus_pick(matches):
+    if not matches:
+        return "offer_upload"
+    return "read" if len(matches) == 1 else "ask_which"
+
+
+def write_allowed(path):
+    """Only ever inside our own folder."""
+    return path.startswith(FOLDER + "/")
+
+
+check("drive-archive", "first study guide is created",
+      guide_action([], "MATH 2153", "Midterm 2"),
+      ("create", "MATH 2153 — Midterm 2 study guide"))
+check("drive-archive", "second run updates in place, no (1) copy",
+      guide_action(["MATH 2153 — Midterm 2 study guide"], "MATH 2153", "Midterm 2")[0],
+      "update")
+check("drive-archive", "a different exam gets its own guide",
+      guide_action(["MATH 2153 — Midterm 2 study guide"], "MATH 2153", "Final")[0],
+      "create")
+check("drive-archive", "one syllabus match reads it", syllabus_pick(["a.pdf"]), "read")
+check("drive-archive", "several matches ask rather than taking the newest",
+      syllabus_pick(["a.pdf", "b.pdf"]), "ask_which")
+check("drive-archive", "no match offers upload, does not widen the search",
+      syllabus_pick([]), "offer_upload")
+check("drive-archive", "writes are confined to the Canvas Assistant folder",
+      [write_allowed(p_) for p_ in
+       ["Canvas Assistant/guide.md", "Thesis/chapter1.docx", "guide.md", "/etc/passwd"]],
+      [True, False, False, False])
+
+
 # ── report ─────────────────────────────────────────────────────────────────
 width = max(len(n) for _, n, _, _, _ in results) + 2
 group = None
