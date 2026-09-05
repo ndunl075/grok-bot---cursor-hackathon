@@ -97,6 +97,19 @@ GET /users/self          -> smoke test, cheapest possible call
 GET /courses?enrollment_state=active
 ```
 
-If `/users/self` returns 401, the token is dead. If it returns HTML, the base
-URL is wrong (you are hitting the web app, not the API) — check for a missing
-`/api/v1` or a school SSO redirect.
+If `/users/self` returns 401, the token is dead.
+
+**If it returns HTML, the base URL is wrong and no token will fix it.** Three
+causes, in rough order of likelihood:
+
+1. You are hitting the web app rather than the API — a missing `/api/v1`.
+2. A school SSO redirect is serving a login page.
+3. The instance is decommissioned. `canvas.instructure.com` — Instructure's
+   old Free-for-Teacher host — now serves a static "Free for Teacher is
+   discontinued" page, so it is useless as a test target and looks like a
+   client failure when it is really a dead server.
+
+Detect this by sniffing the first non-whitespace byte for `<` before parsing
+JSON, which is what `canvas-core` and `tools/canvas_smoke.py` both do. Reporting
+"invalid JSON" here sends the student hunting for a token problem they do not
+have.

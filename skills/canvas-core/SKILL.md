@@ -160,6 +160,19 @@ itself is the signal.** Instructors write to students. Say so and move on.
 | 403 | If rate-limited, back off. Otherwise mark the course unavailable and continue. |
 | 404 | Endpoint disabled for this course. Degrade, do not error. |
 | 5xx | Retry once after 5s. Then report "Canvas is down" and use cached data, labeled as cached. |
+| **HTML body** | Not an auth problem. The host is wrong: the web app, an SSO redirect, or a decommissioned instance. Say so and ask for the address they see in the browser — never suggest regenerating the token, which is the wrong fix and wastes their time. |
+
+**Check the body shape before the status class.** A decommissioned instance
+returns `503` with an HTML maintenance page *permanently*, so treating it as a
+transient 5xx means retrying forever and reporting "Canvas is down" every
+morning about a host that is never coming back. Observed in the wild:
+`canvas.instructure.com` answers `503`, `Content-Type: text/html`, 34,870 bytes,
+saying Free-for-Teacher is discontinued.
+
+So: sniff the first non-whitespace byte for `<` first. If it is HTML, the host
+is wrong regardless of the status code — stop retrying and ask for the URL. A
+JSON parse error here reads as "your token is broken" and sends the student to
+Canvas settings for a problem that lives in the address bar.
 
 Never crash a routine on a single course's failure. A brief covering four of
 five courses, with the fifth named as unreachable, is a good brief. A brief
