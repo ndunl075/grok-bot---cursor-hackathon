@@ -8,7 +8,14 @@ Run top to bottom before exporting the template. Do not skip the greps.
 - [ ] Delete `canvas_base_url` if it names your school.
 - [ ] Delete every `Course` memory (names, codes, IDs are personally identifying).
 - [ ] Delete every `Assignment`, `RiskScore`, and `StudyItem` memory.
-- [ ] Delete routine state: `last_run`, `sent_ids`.
+- [ ] Delete routine state: `last_run`, `sent_ids`, and
+      `routine_state:weekly-retro.snapshot`.
+- [ ] **Delete every `groups:{course_id}` entry.** These hold other students'
+      names and Canvas ids. They are not yours to share, and a template is a
+      public artifact. This is the one step on this list with someone else's
+      privacy attached to it.
+- [ ] Delete `office_hours:{course_id}` (instructor names and room numbers) and
+      `syllabus_candidates`.
 - [ ] Keep: `UserPrefs` defaults only if generic (target 90, brief_style short).
 
 ## 2. Strip secrets from the repo
@@ -17,6 +24,8 @@ Run top to bottom before exporting the template. Do not skip the greps.
 grep -rInE '[0-9]{4}~[A-Za-z0-9]{20,}' . --exclude-dir=.git   # Canvas token shape
 grep -rInE '\.instructure\.com' . --exclude-dir=.git --exclude=ARCHITECTURE.md
 grep -rIn 'Bearer [A-Za-z0-9]' . --exclude-dir=.git
+grep -rInE 'feeds/calendars/user_' . --exclude-dir=.git       # ICS feed is a credential too
+git status --porcelain --ignored tests/fixtures/live/         # captures must stay uncommitted
 ```
 
 All three must return nothing but doc placeholders. A Canvas token looks like
@@ -35,7 +44,10 @@ first-party integrations. They do not carry MCP servers, scripts, or keys.
 - [ ] Skills: include all of `skills/`.
 - [ ] Routines: include all of `routines/`.
 - [ ] Memories: include **none**. The first-run flow rebuilds them.
-- [ ] Integrations: include Google Calendar only if calendar-sync shipped.
+- [ ] Integrations: declare Google Calendar only if calendar-sync shipped. The
+      declaration travels; the authorization does not. Whoever installs connects
+      their own account, so say that in the description rather than letting sync
+      silently no-op for them.
 
 ## 4. Fresh-install test
 

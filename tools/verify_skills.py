@@ -168,7 +168,186 @@ check("study-engine", "never sources the post-exam module",
       "Unit 5 — Multiple Integrals" in source_modules(m1102, 5), False)
 
 
-# ── report ────────────────────────────────────────────────────────────────
+# ── office-hours-finder ───────────────────────────────────────────────────
+DAYNAME = {"monday": "Mon", "tuesday": "Tue", "wednesday": "Wed",
+           "thursday": "Thu", "friday": "Fri", "saturday": "Sat", "sunday": "Sun"}
+DAYLETTER = {"M": "Mon", "T": "Tue", "W": "Wed", "R": "Thu", "F": "Fri"}
+TIMESPAN = re.compile(
+    r"(\d{1,2})(?::(\d{2}))?\s*(am|pm)?\s*(?:-|–|—|to)\s*"
+    r"(\d{1,2})(?::(\d{2}))?\s*(am|pm)?", re.I)
+ROOM = re.compile(r"\b([A-Z][A-Za-z']+)\s+(\d{2,4})\b")
+
+
+def _hour(h, mer, is_start):
+    """Bare hours are PM in an academic context, except a morning-looking start.
+    skills/office-hours-finder/SKILL.md: 8-11 reads AM, 12 and 1-7 read PM."""
+    h = int(h)
+    if mer:
+        m = mer.lower()
+        if m == "pm" and h != 12: h += 12
+        if m == "am" and h == 12: h = 0
+        return h
+    return h if 8 <= h <= 11 else (h if h == 12 else h + 12)
+
+
+def parse_office_hours(text):
+    if re.search(r"by appointment", text, re.I):
+        return {"found": False}
+
+    days = [DAYNAME[m.lower()] for m in
+            re.findall(r"\b(monday|tuesday|wednesday|thursday|friday|saturday|sunday)s?\b",
+                       text, re.I)]
+    if not days:
+        for tok in re.findall(r"\b([MTWRF]{2,5})\b", text):
+            days = [DAYLETTER[c] for c in tok]
+            break
+    t = TIMESPAN.search(text)
+    if not days or not t:
+        return {"found": False}
+
+    sh, sm, smer, eh, em, emer = t.groups()
+    smer = smer or emer                      # "2-4pm" -> pm applies to both
+    out = {
+        "found": True,
+        "day": ",".join(dict.fromkeys(days)),
+        "start": f"{_hour(sh, smer, True):02d}:{int(sm or 0):02d}",
+        "end":   f"{_hour(eh, emer or smer, False):02d}:{int(em or 0):02d}",
+        "location": None,
+    }
+    tail = text[t.end():]
+    room = ROOM.search(tail)
+    if room:
+        out["location"] = f"{room.group(1)} {room.group(2)}"
+    if re.search(r"\bthis week\b", text, re.I):
+        out["temporary"] = True
+    if re.search(r"\b(TA|teaching assistant|grader)\b", text):
+        out["staff"] = "ta"
+    return out
+
+
+for s_ in load("syllabus_text_1101.json")["samples"]:
+    got, exp = parse_office_hours(s_["text"]), s_["_expect"]
+    for k in exp:
+        check("office-hours-finder", f'{s_["id"]}.{k}', got.get(k), exp[k])
+
+
+# ── weekly-retro ──────────────────────────────────────────────────────────
+def deltas(snapshot, now):
+    out = {}
+    for cid, prev in snapshot["courses"].items():
+        cur = next((v for v in now.values() if v["course_id"] == cid), None)
+        if cur:
+            out[cid] = round(cur["current_pct"] - prev["current_pct"], 1)
+    return out
+
+
+def newly_unreachable(snapshot, now, target=90.0):
+    hit = []
+    for cid, prev in snapshot["courses"].items():
+        cur = next((v for v in now.values() if v["course_id"] == cid), None)
+        if cur and prev["ceiling_pct"] >= target > cur["ceiling_pct"]:
+            hit.append(cid)
+    return hit
+
+
+snap, now_ = load("snapshots.json"), load("expected_output.json")
+d = deltas(snap, now_)
+check("weekly-retro", "CSE 3901 delta (midterm landed)", d["1101"], -5.4)
+check("weekly-retro", "MATH 2153 delta (WebAssign 5 landed)", d["1102"], 2.9)
+check("weekly-retro", "leads with the largest absolute move",
+      max(d, key=lambda k: abs(d[k])), "1101")
+check("weekly-retro", "detects every ceiling that closed below 90 this week",
+      sorted(newly_unreachable(snap, now_)), ["1101", "1102"])
+check("weekly-retro", "ties break to the course whose grade moved most",
+      max(newly_unreachable(snap, now_), key=lambda c: abs(d[c])), "1101")
+check("weekly-retro", "no snapshot means no deltas, not deltas from zero",
+      deltas({"courses": {}}, now_), {})
+
+
+# ── group-project-tracker ─────────────────────────────────────────────────
+grp = load("groups_1101.json")
+check("group-project-tracker", "detects a group assignment by group_category_id",
+      grp["assignment_group_category"]["group_category_id"] is not None, True)
+check("group-project-tracker", "group submission is unsubmitted",
+      grp["submission"]["workflow_state"], "unsubmitted")
+check("group-project-tracker", "72h window catches Project 2 a day before deadline-guard",
+      guard(iso("2026-09-08T11:00:00Z"), 72, 5), ["Project 2: Rails API"])
+check("group-project-tracker", "stores only id and short_name for teammates",
+      sorted(set(k for u in grp["groups"][0]["users"] for k in u)),
+      ["id", "short_name"])
+
+
+# ── calendar-sync ─────────────────────────────────────────────────────────
+def sync_action(assignment, event):
+    """Keyed on canvas_assignment_id in extendedProperties, never on the title."""
+    if assignment is None:
+        return "delete" if event else "skip"
+    if assignment.get("submitted") or not assignment.get("due_at"):
+        return "delete" if event else "skip"
+    if event is None:
+        return "create"
+    if event["due_at"] != assignment["due_at"]:
+        return "patch_time"
+    if event["title"] != assignment["title"]:
+        return "patch_title"
+    return "skip"
+
+
+A = {"title": "CSE 3901 — Project 2", "due_at": "2026-09-11T03:59:00Z", "submitted": False}
+E = {"title": "CSE 3901 — Project 2", "due_at": "2026-09-11T03:59:00Z"}
+check("calendar-sync", "second run is a no-op (idempotent)", sync_action(A, E), "skip")
+check("calendar-sync", "first run creates", sync_action(A, None), "create")
+check("calendar-sync", "moved due date patches the time",
+      sync_action(A, {**E, "due_at": "2026-09-14T03:59:00Z"}), "patch_time")
+check("calendar-sync", "renamed assignment patches the title, not a duplicate",
+      sync_action({**A, "title": "CSE 3901 — Rails API Project"}, E), "patch_title")
+check("calendar-sync", "submitting removes the event",
+      sync_action({**A, "submitted": True}, E), "delete")
+check("calendar-sync", "undated assignments never sync",
+      sync_action({**A, "due_at": None}, None), "skip")
+
+
+# ── syllabus-ingest ───────────────────────────────────────────────────────
+SYNS = {"hw": "homework", "assignment": "homework", "proj": "project"}
+WORDNUM = {"one": "1", "two": "2", "three": "3", "four": "4", "five": "5"}
+
+
+def norm(name):
+    n = re.sub(r"[^a-z0-9 ]", " ", name.lower())
+    n = re.sub(r"([a-z])(\d)", r"\1 \2", n)     # HW5 -> hw 5, so HW == Homework
+    parts = []
+    for w in n.split():
+        w = SYNS.get(w, WORDNUM.get(w, w))
+        parts.append(w.lstrip("0") if w.isdigit() else w)
+    return " ".join(parts)
+
+
+def matches(candidate, canvas_items, day_tol=1):
+    for it in canvas_items:
+        if norm(candidate["name"]) == norm(it["name"]):
+            return it
+        gap = abs((iso(candidate["due"]) - iso(it["due"])).days)
+        shared = set(norm(candidate["name"]).split()) & set(norm(it["name"]).split())
+        if gap <= day_tol and any(len(w) > 3 for w in shared):
+            return it
+    return None
+
+
+CANVAS = [{"name": "Project 2: Rails API", "due": "2026-09-11T03:59:00Z"},
+          {"name": "HW5", "due": "2026-09-16T03:59:00Z"}]
+check("syllabus-ingest", "'Homework 5' matches Canvas 'HW5' by normalized name",
+      matches({"name": "Homework 5", "due": "2026-09-16T03:59:00Z"}, CANVAS)["name"], "HW5")
+check("syllabus-ingest", "'Project Two' matches 'Project 2' despite the rename",
+      matches({"name": "Project Two", "due": "2026-09-11T03:59:00Z"}, CANVAS)["name"],
+      "Project 2: Rails API")
+check("syllabus-ingest", "a date one day off still matches on a shared token",
+      matches({"name": "Rails API", "due": "2026-09-10T03:59:00Z"}, CANVAS)["name"],
+      "Project 2: Rails API")
+check("syllabus-ingest", "a genuinely new item proposes nothing to match",
+      matches({"name": "Final Project", "due": "2026-12-08T03:59:00Z"}, CANVAS), None)
+
+
+# ── report ─────────────────────────────────────────────────────────────────
 width = max(len(n) for _, n, _, _, _ in results) + 2
 group = None
 fails = 0

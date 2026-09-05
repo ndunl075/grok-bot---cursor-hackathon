@@ -1,0 +1,29 @@
+{
+  "_fixture_note": "Free text as it appears in a syllabus page or a pinned announcement. office-hours-finder must parse all five and reject the sixth.",
+  "samples": [
+    { "id": "s1", "source": "syllabus_page",
+      "text": "Office hours: Tuesdays 2-4pm, Dreese 480.",
+      "_expect": { "found": true, "day": "Tue", "start": "14:00", "end": "16:00", "location": "Dreese 480" } },
+
+    { "id": "s2", "source": "syllabus_page",
+      "text": "OH: MWF 10:00-11:00 in Baker 210",
+      "_expect": { "found": true, "day": "Mon,Wed,Fri", "start": "10:00", "end": "11:00", "location": "Baker 210" } },
+
+    { "id": "s3", "source": "announcement",
+      "text": "I hold office hours Thursday afternoons from 1 to 3 in my office, Journalism 300.",
+      "_expect": { "found": true, "day": "Thu", "start": "13:00", "end": "15:00", "location": "Journalism 300" } },
+
+    { "id": "s4", "source": "announcement",
+      "text": "Office hours move to Thursday 2-4pm this week only.",
+      "_expect": { "found": true, "day": "Thu", "start": "14:00", "end": "16:00", "location": null, "temporary": true } },
+
+    { "id": "s5", "source": "syllabus_page",
+      "text": "TA office hours: Wednesday 5:30-7:00pm, Caldwell 120.",
+      "_expect": { "found": true, "day": "Wed", "start": "17:30", "end": "19:00", "location": "Caldwell 120", "staff": "ta" } },
+
+    { "id": "s6", "source": "syllabus_page",
+      "text": "Office hours are by appointment only; email me to arrange a time.",
+      "_expect": { "found": false },
+      "_why": "No fixed time. Must not fabricate one. Report 'by appointment' and stop." }
+  ]
+}

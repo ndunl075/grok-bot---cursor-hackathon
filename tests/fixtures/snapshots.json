@@ -1,0 +1,25 @@
+{
+  "_fixture_note": "weekly-retro needs last week's RiskScore to compute a delta. This is the snapshot taken the previous Sunday, against which the current numbers in expected_output.json are compared.",
+  "taken_at": "2026-09-01T22:00:00Z",
+  "courses": {
+    "1101": {
+      "current_pct": 91.0,
+      "floor_pct": 44.5,
+      "ceiling_pct": 91.0
+    },
+    "1102": {
+      "current_pct": 78.4,
+      "floor_pct": 41.2,
+      "ceiling_pct": 92.6
+    }
+  },
+  "_expect_deltas": {
+    "1101": -5.4,
+    "1102": 2.9,
+    "_newly_unreachable": [
+      "1101",
+      "1102"
+    ],
+    "_why": "1101 fell because the midterm (72) landed. 1102 rose because WebAssign 5 (10/10) landed. Both ceilings crossed below a target of 90 this week (91.0->88.0 and 92.6->87.9), so the retro has to pick one for line 3: it leads with 1101, the course whose grade actually moved, because that is the one the student can connect to a cause."
+  }
+}

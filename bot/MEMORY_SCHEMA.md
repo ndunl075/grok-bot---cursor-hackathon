@@ -24,6 +24,24 @@ file governs *persistence*: lifetime, size, and template-export behavior.
 | `study_items` | StudyItem[] | until exam + 7d | NO |
 | `prefs` | UserPrefs | permanent | defaults only |
 | `routine_state:{name}` | `{last_run, sent_ids[]}` | rolling 30d | NO |
+| `routine_state:weekly-retro` | `{last_run, snapshot}` | overwritten weekly | NO |
+| `groups:{course_id}` | teammate `{id, short_name}` only | until the assignment is graded | **NO — other people's data** |
+| `office_hours:{course_id}` | `{day, start, end, location, staff, until?}` | until the term ends | NO |
+| `syllabus_candidates` | Assignment[] with `id: null`, `source: "syllabus"` | until matched or term ends | NO |
+
+## Other people's data
+
+`groups:{course_id}` is the only key that holds information about someone other
+than the student, and it is the one most likely to leak. Rules:
+
+- Store `id` and `short_name`. Nothing else. Not their grades, not their
+  submission times, not their email, not anything from their comments.
+- Delete the whole entry when the assignment is graded.
+- It never enters a template. `PUBLISH_CHECKLIST.md` has a dedicated step.
+
+calendar-sync stores nothing here: its idempotency key lives in the calendar
+event's own `extendedProperties`, which is the right place for it — the mapping
+survives a memory wipe and cannot drift out of sync with the calendar.
 
 ## Routine state
 
@@ -50,6 +68,10 @@ Bot memory is not a database. Keep it under a few hundred entries.
   already graded.
 - `study_items`: hard cap 15 per exam, delete the set 7 days after the exam.
 - `sent_ids`: prune to 30 days on every routine run.
+- `syllabus_candidates`: drop any candidate that has matched a real Canvas
+  assignment; the Canvas record supersedes it.
+- `routine_state:weekly-retro.snapshot`: one entry per course, overwritten
+  weekly. It is a snapshot, not a history — do not accumulate weeks.
 
 ## Weight provenance
 

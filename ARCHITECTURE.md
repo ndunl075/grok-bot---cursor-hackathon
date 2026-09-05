@@ -202,27 +202,36 @@ Rules: respect quiet_hours. Each routine is stateless except last_run + sent_ids
 
 Each agent: own worktree, own `skills/<name>/`, own `routines/<name>.md`, may only read (not edit) `canvas-core`, `MEMORY_SCHEMA.md`, `ARCHITECTURE.md`. Tests run against `tests/fixtures/`, not live API. PR back to main with a 5-line demo transcript.
 
-> **Status: cut from ten lanes to four.** Ten half-tested skills is the feature
-> pile this document's own ship rule warns against, and there were ~34 hours on
-> the clock. The four below are built and verified against fixtures; the rest
-> are deferred and belong in the post as "coming", not in the template.
+> **Status: all lanes built.** Cut to four at first, then completed once the
+> fixtures and `tools/verify_skills.py` made each addition cheap to verify
+> rather than merely asserted. **78 offline checks, all passing.**
 
-| Scope | State |
-|---|---|
-| deadline-guard + both routines | **built** — windows, impact floor, dedupe and quiet hours all asserted in `tools/verify_skills.py` |
-| announcement-digest + routine | **built** — classifier with negation, past-tense and "unchanged" guards, all asserted |
-| study-engine + study-drip | **built** — trigger and module sourcing asserted; question generation is unverifiable without live files |
-| docs/DEMO_SCRIPT.md + post draft | **built** — plus `docs/demo/` as the animated walkthrough |
-| syllabus-ingest | deferred |
-| calendar-sync | deferred |
-| weekly-retro | routine written, shares daily-brief's retro shape; no separate skill |
-| extension-email | deferred |
-| office-hours-finder | deferred |
-| group-project-tracker | deferred |
+| Scope | State | Verified offline |
+|---|---|---|
+| deadline-guard + both routines | built | windows at three points in the scenario, 3% impact floor, dedupe, quiet-hours boundaries |
+| announcement-digest + routine | built | classifier over 8 fixtures incl. negation, past-tense and "unchanged" traps |
+| study-engine + study-drip | built | exam trigger, 10-day horizon, module sourcing, never sources post-exam modules |
+| weekly-retro (own skill now) | built | week-over-week deltas, largest-move ordering, ceiling-crossing detection, tiebreak |
+| office-hours-finder | built | 5 syllabus formats parsed, "by appointment" correctly refused |
+| group-project-tracker + group-check | built | group detection, 72h window, teammate fields limited to id + short_name |
+| calendar-sync | built | idempotency: create / patch-time / patch-title / delete / no-op |
+| syllabus-ingest | built | name normalization (HW5 = Homework 5), rename and ±1-day matching |
+| extension-email | built | not offline-verifiable; it generates prose |
+| docs/DEMO_SCRIPT.md + post draft | built | plus `docs/demo/` as the animated walkthrough |
 
-Two contract changes came out of building it, both recorded in §2 above:
-`projected_pct` was removed as a tautology, and `Assignment.opened` was removed
-as unobtainable from the student-scoped API.
+**Three contract changes came out of building it**, all recorded above:
+
+1. `projected_pct` removed — algebraically identical to `current_pct`.
+   `ceiling_pct` and `needed_avg_on_remaining` replace it.
+2. `Assignment.opened` removed — not obtainable from the student-scoped API.
+3. `weekly-retro` gained a tiebreak rule. The verifier caught two courses
+   crossing below target in the same week, which the spec had no answer for.
+
+**One rule was written down that this document did not anticipate**, in
+`skills/group-project-tracker/SKILL.md`: naming *which teammate* is behind
+cannot be built. Canvas exposes one submission per group, not per member, and
+inferring it from timestamps would be guessing about a real person. The skill
+reports group state only.
 
 ### Phase 3 — publish (main agent)
 

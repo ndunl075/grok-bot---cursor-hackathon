@@ -35,11 +35,11 @@ When you sit down, in this order:
 |---|---|
 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | The build contract. Data model, phases, what shipped and what was cut. |
 | `bot/` | Identity, first-run flow, failure modes; and the memory persistence contract. |
-| `skills/` | canvas-core, grade-model, daily-brief, deadline-guard, announcement-digest, study-engine. |
-| `routines/` | All seven, with dedupe and quiet-hours semantics. |
+| `skills/` | Twelve: canvas-core, grade-model, daily-brief, deadline-guard, announcement-digest, study-engine, weekly-retro, office-hours-finder, group-project-tracker, calendar-sync, extension-email, syllabus-ingest. |
+| `routines/` | All eight, with dedupe, precedence and quiet-hours semantics. |
 | [`docs/CANVAS_API.md`](docs/CANVAS_API.md) | The Canvas gotchas that each cost a day. |
 | `docs/demo/` | Animated walkthrough, built for screen capture. |
-| `tests/fixtures/` | Canvas responses covering weighted and unweighted courses, a 403 course, a 404 endpoint, and eight announcements chosen to break a naive classifier. |
+| `tests/fixtures/` | Canvas responses covering weighted and unweighted courses, a 403 course, a 404 endpoint, eight announcements chosen to break a naive classifier, six office-hours formats, a group assignment, and last week's snapshot. |
 | `tools/` | Local only. Never ships in the template. |
 
 ## Verifying
@@ -53,7 +53,9 @@ python3 tools/verify_skills.py      # deadline windows, dedupe, quiet hours, cla
 
 `grade_model_ref.py` currently reports **drift 0.0** against Canvas's
 `computed_current_score` on both a weighted and an unweighted course.
-`verify_skills.py` is **30/30**.
+`verify_skills.py` is **78/78**, covering every skill whose logic is decidable
+without a live API. `extension-email` is the one that isn't — it generates
+prose, and there is nothing honest to assert about it offline.
 
 ## What ships in the template
 
